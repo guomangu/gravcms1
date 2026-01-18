@@ -130,5 +130,27 @@
         "read_by": [
             "guang"
         ]
+    },
+    "msg_696d4ab0f233c": {
+        "id": "msg_696d4ab0f233c",
+        "channel_type": "space_internal",
+        "channel_id": "dev-web",
+        "sender": "guillaume",
+        "content": "yo",
+        "timestamp": "2026-01-18 21:03:44",
+        "read_by": [
+            "guillaume"
+        ]
+    },
+    "msg_696d5b7a78676": {
+        "id": "msg_696d5b7a78676",
+        "channel_type": "space_external",
+        "channel_id": "test-adtes",
+        "sender": "testuser3375",
+        "content": "yo",
+        "timestamp": "2026-01-18 22:15:22",
+        "read_by": [
+            "testuser3375"
+        ]
     }
 }

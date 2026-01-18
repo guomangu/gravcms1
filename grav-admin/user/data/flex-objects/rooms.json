@@ -147,5 +147,77 @@
         "access_level": "public",
         "location": "",
         "created": "2026-01-17 23:55:51"
+    },
+    "la-maisonnette": {
+        "name": "la maisonnette",
+        "description": "on y est bien",
+        "slug": "la-maisonnette",
+        "admins": [
+            "testuser3375"
+        ],
+        "members": [
+            "testuser3375"
+        ],
+        "access_level": "public",
+        "location": "7 Rue de Sigolsheim 68000 Colmar",
+        "created": "2026-01-18 21:32:29"
+    },
+    "mairie-d-amiens": {
+        "name": "Mairie d Amiens",
+        "description": "",
+        "slug": "mairie-d-amiens",
+        "admins": [
+            "testuser3375"
+        ],
+        "members": [
+            "testuser3375"
+        ],
+        "access_level": "public",
+        "location": "Amiens",
+        "created": "2026-01-18 21:39:27"
+    },
+    "alallla": {
+        "name": "alallla",
+        "description": "yo",
+        "slug": "alallla",
+        "admins": [
+            "testuser3375"
+        ],
+        "members": [
+            "testuser3375"
+        ],
+        "access_level": "public",
+        "location": "Chemin de la Mosquée 06160 Antibes",
+        "created": "2026-01-18 21:46:12"
+    },
+    "test-adtes": {
+        "name": "test adtes",
+        "description": "hopla",
+        "slug": "test-adtes",
+        "admins": [
+            "testuser3375"
+        ],
+        "members": [
+            "testuser3375"
+        ],
+        "access_level": "public",
+        "location": "7 Rue de Guebwiller 68200 Mulhouse",
+        "address_tag": null,
+        "created": "2026-01-18 22:15:00"
+    },
+    "treza": {
+        "name": "treza",
+        "description": "treszq",
+        "slug": "treza",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "7 rue Rude 87000 Limoges",
+        "address_tag": "6f99b4814cb1e3b095f9f9e8d8fadcbb",
+        "created": "2026-01-18 22:47:16"
     }
 }

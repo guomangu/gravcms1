@@ -55,6 +55,7 @@ class SocialCorePlugin extends Plugin
         if ($this->isAdmin()) {
             $this->enable([
                 'onFlexAfterSave' => ['onFlexAfterSave', 0],
+                'onFlexObjectBeforeSave' => ['onFlexObjectBeforeSave', 0],
             ]);
             return;
         }
@@ -62,8 +63,19 @@ class SocialCorePlugin extends Plugin
         // Enable frontend events
         $this->enable([
             'onFlexAfterSave' => ['onFlexAfterSave', 0],
+            'onFlexObjectBeforeSave' => ['onFlexObjectBeforeSave', 0],
+            'onTwigInitialized' => ['onTwigInitialized', 0],
             'onTwigSiteVariables' => ['onTwigSiteVariables', 0],
+            'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
         ]);
+    }
+
+    /**
+     * Add current directory to twig lookup paths.
+     */
+    public function onTwigTemplatePaths()
+    {
+        $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
     }
 
     /**
@@ -74,6 +86,13 @@ class SocialCorePlugin extends Plugin
     {
         $twig = $this->grav['twig'];
         $locator = $this->grav['locator'];
+        
+        // Add Social Core assets
+        $this->grav['assets']->addJs('plugin://social-core/assets/js/address-autocomplete.js', ['group' => 'bottom', 'defer' => true]);
+        $this->grav['assets']->addCss('plugin://social-core/assets/css/address-autocomplete.css');
+        $this->grav['assets']->addCss('plugin://social-core/assets/css/room-address.css');
+
+
         
         // Variables par défaut
         $rooms = [];
@@ -149,6 +168,46 @@ class SocialCorePlugin extends Plugin
             'error' => $error,
             'source' => 'direct_json'
         ];
+    }
+
+    /**
+     * Register Custom Twig Functions
+     */
+    public function onTwigInitialized()
+    {
+        $this->grav['twig']->twig()->addFunction(
+            new \Twig\TwigFunction('get_address_hierarchy', [$this, 'getAddressHierarchy'])
+        );
+    }
+
+    /**
+     * Get address hierarchy for a given tag ID
+     * Returns: [RegionTag, CityTag, StreetTag, NumberTag]
+     */
+    public function getAddressHierarchy($tagId)
+    {
+        if (!$tagId) return [];
+
+        $directory = $this->getFlexDirectory('knowledge-tags');
+        if (!$directory) return [];
+
+        $hierarchy = [];
+        $currentId = $tagId;
+        
+        // Limit depth to avoid infinite loops
+        for ($i = 0; $i < 10; $i++) {
+            $tag = $directory->getObject($currentId);
+            if (!$tag) break;
+            
+            array_unshift($hierarchy, $tag); // Add to beginning (Child -> Parent becomes Parent -> Child)
+            
+            $parentId = $tag->getProperty('parent');
+            if (!$parentId) break;
+            
+            $currentId = $parentId;
+        }
+        
+        return $hierarchy;
     }
 
     /**
@@ -677,9 +736,173 @@ class SocialCorePlugin extends Plugin
         $type = $object->getFlexType();
 
         // Handle Space-User Synchronization (only in admin)
-        if ($type === 'social-spaces' && $this->isAdmin()) {
-            $this->syncSpaceMembers($object);
+        if ($type === 'social-spaces') {
+             if ($this->isAdmin()) {
+                 $this->syncSpaceMembers($object);
+             }
+         }
+    }
+    
+    /**
+     * Hook before saving a Flex Object
+     */
+    public function onFlexObjectBeforeSave(Event $event)
+    {
+        $object = $event['object'];
+        if ($object->getFlexType() !== 'social-spaces') {
+            return;
         }
+
+        // Check if address data was submitted
+        $form = $this->grav['request']->getParsedBody();
+        $addressDataJson = $form['data']['address_data'] ?? null;
+        
+        if ($addressDataJson) {
+            $addressData = json_decode($addressDataJson, true);
+            if ($addressData && isset($addressData['properties'])) {
+                $tagId = $this->processAddressHierarchy($addressData['properties']);
+                if ($tagId) {
+                    $object->set('address_tag', $tagId);
+                    // Also save raw location data for easier component access if needed
+                    $object->set('location', $addressData['properties']['label'] ?? '');
+                    $coordinates = $addressData['geometry']['coordinates'] ?? null;
+                    if ($coordinates) {
+                        $object->set('longitude', $coordinates[0]);
+                        $object->set('latitude', $coordinates[1]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Process address hierarchy and return the leaf node ID (Number or Street)
+     */
+    /**
+     * Process address hierarchy and return the leaf node ID (Number or Street)
+     * Strictly enforces: Region -> City -> Street -> Number
+     */
+    public function processAddressHierarchy($props)
+    {
+        $directory = $this->getFlexDirectory('knowledge-tags');
+        if (!$directory) return null;
+
+        // 0. Country (Racine fixe pour API Adresse qui est France uniquement)
+        $countryName = 'France';
+        $countryTag = $this->findOrCreateTag($directory, $countryName, 'pays', null, [
+            'description' => 'Pays'
+        ]);
+
+        // 1. Region / Department (Enfant de Pays)
+        // Utlise 'context' (ex: "Somme, Hauts-de-France") ou 'citycode' (ex: 80021 -> 80)
+        $regionName = $props['context'] ?? substr($props['citycode'] ?? '00000', 0, 2); 
+        $regionTag = $this->findOrCreateTag($directory, $regionName, 'region', $countryTag->getKey(), [
+            'description' => 'Région / Département auto-généré'
+        ]);
+
+        // 2. City (Enfant de Region)
+        $cityName = $props['city'] ?? 'Ville Inconnue';
+        $cityTag = $this->findOrCreateTag($directory, $cityName, 'ville', $regionTag->getKey(), [
+            'citycode' => $props['citycode'] ?? '',
+            'postcode' => $props['postcode'] ?? '',
+            'description' => $props['city'] ?? ''
+        ]);
+
+        // 3. Street (Enfant de City)
+        $streetName = $props['street'] ?? $props['name'] ?? 'Rue Inconnue';
+        // Si pas de numéro, l'objet s'arrête ici
+        $streetTag = $this->findOrCreateTag($directory, $streetName, 'rue', $cityTag->getKey(), [
+            'description' => $streetName
+        ]);
+
+        // 4. Number (Enfant de Street, facultatif)
+        if (!empty($props['housenumber'])) {
+            $numberTag = $this->findOrCreateTag($directory, $props['housenumber'], 'numero', $streetTag->getKey(), [
+                 'latitude' => $props['y'] ?? $props['latitude'] ?? null,
+                 'longitude' => $props['x'] ?? $props['longitude'] ?? null,
+                 'description' => $props['label'] ?? ''
+            ]);
+            return $numberTag->getKey();
+        }
+
+        return $streetTag->getKey();
+    }
+
+    /**
+     * Helper to find or create a tag
+     * Ensures uniqueness by Parent + Slug strategy
+     */
+    protected function findOrCreateTag($directory, $name, $type, $parentId = null, $extraData = [])
+    {
+        if (empty($name)) return null;
+
+        // Génération d'un slug unique basé sur le parent pour éviter les collisions (ex: Rue de la Paix à Paris vs Amiens)
+        // Slug = type-slug(name)-hash(parent)
+        $parentHash = $parentId ? substr(md5($parentId), 0, 5) : 'root';
+        $slugBase = self::staticSlugify($name);
+        
+        // Optimisation : slug court si racine, long si enfant
+        $uniqueSlug = $parentId ? "{$type}-{$slugBase}-{$parentHash}" : self::staticSlugify("{$type}-{$name}");
+        
+        // Tentative de récupération directe
+        $object = $directory->getObject($uniqueSlug);
+        
+        if ($object) {
+            return $object;
+        }
+
+        // Création si inexistant
+        try {
+            $data = array_merge([
+                'name' => $name,
+                'slug' => $uniqueSlug,
+                'tag_type' => $type,
+                'parent' => $parentId, // Lien de parenté
+                'published' => true
+            ], $extraData);
+
+            $object = $directory->createObject($data, $uniqueSlug);
+            $object->save();
+            
+            return $object;
+        } catch (\Exception $e) {
+            // Fallback si erreur de concurrence (double création)
+            $this->grav['log']->warning("Tag creation collision handled for: $uniqueSlug");
+            return $directory->getObject($uniqueSlug);
+        }
+    }
+
+    /**
+     * Static method to provide options for existing tags (used in blueprints)
+     */
+    public static function getKnowledgeTagsOptions()
+    {
+        $grav = \Grav\Common\Grav::instance();
+        $directory = $grav['flex']->getDirectory('knowledge-tags');
+        if (!$directory) return [];
+        
+        $options = [];
+        $collection = $directory->getCollection();
+        
+        foreach ($collection as $object) {
+            $type = $object->getProperty('tag_type') ?? 'general';
+            $name = $object->getProperty('name');
+            $parent = $object->getProperty('parent');
+            
+            $label = "[$type] $name";
+            
+            // Add parent info for context
+            if ($parent) {
+                $parentObj = $directory->getObject($parent);
+                if ($parentObj) {
+                    $label .= " ( < " . $parentObj->getProperty('name') . " )";
+                }
+            }
+            
+            $options[$object->getKey()] = $label;
+        }
+        
+        return $options;
     }
 
     /**
@@ -761,7 +984,7 @@ class SocialCorePlugin extends Plugin
             $this->handleSpaceCreation($form);
         }
 
-        if ($form->name === 'create-room-form') {
+        if ($form->name === 'create-room') {
             $this->handleRoomCreationFromForm($form);
         }
     }
@@ -772,9 +995,15 @@ class SocialCorePlugin extends Plugin
      * 
      * Utilise SimpleStorage avec fichier JSON unique
      */
-    public static function processCreateRoom($form)
+    /**
+     * Instance method for room creation
+     * Called by onFormProcessed via handleRoomCreationFromForm
+     * 
+     * Utilise SimpleStorage avec fichier JSON unique
+     */
+    public function processCreateRoom($form)
     {
-        $grav = \Grav\Common\Grav::instance();
+        $grav = $this->grav;
         $user = $grav['user'];
         
         // Check authentication
@@ -825,12 +1054,27 @@ class SocialCorePlugin extends Plugin
                 $rooms = json_decode($content, true) ?: [];
             }
             
-            // Vérifier si le slug existe déjà
+            // Verify slug uniqueness
             if (isset($rooms[$slug])) {
                 $slug = $slug . '-' . substr(uniqid(), -6);
             }
 
-            // Données de la room
+            // Process Address Data
+            $addressTagId = null;
+            $locationData = $data['address_data'] ?? null;
+            
+            if ($locationData) {
+                $addressProps = json_decode($locationData, true);
+                if ($addressProps && isset($addressProps['properties'])) {
+                    // Call plugin instance method directly using $this
+                    $addressTagId = $this->processAddressHierarchy($addressProps['properties']);
+                    
+                    // Update location with formatted label
+                    $location = $addressProps['properties']['label'] ?? $location;
+                }
+            }
+
+            // Room Data
             $roomData = [
                 'name' => $name,
                 'description' => $description,
@@ -839,6 +1083,7 @@ class SocialCorePlugin extends Plugin
                 'members' => [$user->username],
                 'access_level' => $accessLevel,
                 'location' => $location,
+                'address_tag' => $addressTagId,
                 'created' => date('Y-m-d H:i:s')
             ];
 
@@ -858,28 +1103,25 @@ class SocialCorePlugin extends Plugin
             $accounts = $grav['accounts'] ?? null;
             if ($accounts) {
                 $userObj = $accounts->load($user->username);
-                if ($userObj && $userObj->exists()) {
+                if ($userObj) {
                     $relations = $userObj->get('relations', []);
                     $userSpaces = $relations['spaces'] ?? [];
                     if (!in_array($slug, $userSpaces)) {
                         $userSpaces[] = $slug;
+                        $relations['spaces'] = $userSpaces;
+                        $userObj->set('relations', $relations);
+                        $userObj->save();
                     }
-                    $relations['spaces'] = array_values(array_unique($userSpaces));
-                    $userObj->set('relations', $relations);
-                    $userObj->save();
                 }
             }
-
-            // Success
-            $grav['log']->info('Room created: ' . $slug . ' by ' . $user->username);
-            $grav['messages']->add('Room "' . $name . '" créée avec succès !', 'success');
             
-            // Redirect to the new room
-            $grav->redirect('/room/' . $slug);
-
+            $grav['messages']->add('Room "' . $name . '" créée avec succès !', 'success');
+            $grav->redirect('/mesrooms/' . $slug);
+            return;
+            
         } catch (\Exception $e) {
-            $grav['log']->error('Room creation error: ' . $e->getMessage());
-            $grav['messages']->add('Erreur: ' . $e->getMessage(), 'error');
+            $grav['log']->error('Error creating room: ' . $e->getMessage());
+            $grav['messages']->add('Erreur lors de la création de la room: ' . $e->getMessage(), 'error');
         }
     }
     
@@ -923,8 +1165,8 @@ class SocialCorePlugin extends Plugin
      */
     protected function handleRoomCreationFromForm($form)
     {
-        // Déléguer à la méthode statique qui fonctionne
-        self::processCreateRoom($form);
+        // Déléguer à la méthode d'instance
+        $this->processCreateRoom($form);
     }
 
     /**

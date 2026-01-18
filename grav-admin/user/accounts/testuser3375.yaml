@@ -1,0 +1,13 @@
+state: enabled
+email: testuser8287@example.com
+fullname: 'Test User'
+access:
+  site:
+    login: true
+hashed_password: $2y$12$BiMiSu0bZ3rJgYdtfaTVluOOCLClrOT9LoTeA8DUR7kt1BrIfyn.W
+relations:
+  spaces:
+    - la-maisonnette
+    - mairie-d-amiens
+    - alallla
+    - test-adtes

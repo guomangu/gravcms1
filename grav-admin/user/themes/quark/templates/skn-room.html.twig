@@ -49,6 +49,31 @@
                     <span class="skn-room-header__meta">
                         <i class="la la-users"></i> {{ total_members }} membre(s)
                     </span>
+                    
+                    {# Display Address Hierarchy #}
+                    {% if room.address_tag %}
+                        {% set address_chain = get_address_hierarchy(room.address_tag) %}
+                        {% if address_chain %}
+                            <div class="skn-room-address">
+                                <i class="la la-map-marker"></i>
+                                <div class="skn-address-breadcrumbs">
+                                    {% for tag in address_chain %}
+                                        <a href="/tags/{{ tag.slug }}" class="skn-address-tag skn-address-tag--{{ tag.tag_type }}" title="{{ tag.tag_type|capitalize }}">
+                                            {{ tag.name }}
+                                        </a>
+                                        {% if not loop.last %}
+                                            <span class="skn-address-separator">/</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% elseif room.location %}
+                        <div class="skn-room-address">
+                            <i class="la la-map-marker"></i>
+                            <span class="skn-address-text">{{ room.location }}</span>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 

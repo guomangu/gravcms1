@@ -1,0 +1,19 @@
+{% extends "forms/field.html.twig" %}
+
+{% block input %}
+    <div class="address-autocomplete-wrapper">
+        <input
+            type="text"
+            id="{{ field.id|default(field.name) }}"
+            name="{{ (scope ~ field.name)|fieldName }}"
+            value="{{ value }}"
+            class="address-autocomplete-input"
+            placeholder="{{ field.placeholder|default('Rechercher une adresse...') }}"
+            autocomplete="off"
+        />
+        <ul class="address-autocomplete-results" style="display:none;"></ul>
+        
+        {# Hidden fields to store structured data #}
+        <input type="hidden" name="{{ (scope ~ 'address_data')|fieldName }}" class="address-data-input" value="" />
+    </div>
+{% endblock %}

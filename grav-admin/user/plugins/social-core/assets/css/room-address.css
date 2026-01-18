@@ -1,0 +1,92 @@
+/* Room Address Styles */
+.skn-room-address {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.skn-address-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Base Tag */
+.skn-address-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.skn-address-tag:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Numéro : Badge style */
+.skn-address-tag--numero {
+    background: #333;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 1px 8px;
+    font-size: 0.8em;
+}
+
+/* Rue : Clean style */
+.skn-address-tag--rue {
+    background: #fff;
+    border-color: #e0e0e0;
+    color: #444;
+}
+
+.skn-address-tag--rue:hover {
+    border-color: #bdbdbd;
+    background: #f9f9f9;
+}
+
+/* Ville : Prominent style */
+.skn-address-tag--ville {
+    background: #e3f2fd;
+    color: #1565c0;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.5px;
+}
+
+.skn-address-tag--ville:hover {
+    background: #bbdefb;
+    color: #0d47a1;
+}
+
+/* Région : Contextual style */
+.skn-address-tag--region {
+    background: transparent;
+    color: #757575;
+    font-style: italic;
+    padding-left: 0;
+}
+
+.skn-address-tag--region:hover {
+    color: #424242;
+    background: transparent;
+    text-decoration: underline;
+}
+
+/* Separators */
+.skn-address-separator {
+    color: #bdbdbd;
+    font-size: 0.7em;
+    margin: 0 2px;
+}

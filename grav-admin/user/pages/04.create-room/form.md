@@ -5,6 +5,7 @@ body_classes: skn-page--create-room
 cache_enable: false
 process:
     twig: true
+
 access:
     site.login: true
 
@@ -32,27 +33,26 @@ form:
             rows: 3
             classes: form-input
         
-        access_level:
-            type: select
-            label: Visibilité
-            default: public
-            classes: form-input
-            options:
-                public: "Public - Visible par tous"
-                private: "Privé - Sur invitation"
+        
+        address_data:
+            type: hidden
         
         location:
-            type: text
+            type: address-autocomplete
             label: Localisation (optionnel)
-            placeholder: Paris, France
+            placeholder: Rechercher une adresse...
             classes: form-input
+        
+
     
     buttons:
         submit:
             type: submit
             value: Créer la room
             classes: skn-btn skn-btn--primary skn-btn--block
-    
+
     process:
-        - call: ['\Grav\Plugin\SocialCorePlugin', 'processCreateRoom']
+        - create_room: true
+    
+
 ---

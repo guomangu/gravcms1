@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledJsonFile',
     'filename' => '/home/gu/g2/grav-admin/user/data/flex-objects.json',
-    'modified' => 1768768839,
-    'size' => 2757,
+    'modified' => 1768776436,
+    'size' => 3832,
     'data' => [
         '72b605af2aefde5b913e3c43442834da' => [
             'id' => 'msg_696c241176bf7',
@@ -136,6 +136,49 @@ return [
             'object_type' => 'space',
             'object_id' => 'demo-ia',
             'context' => 'guang'
+        ],
+        'cc173dc1b93f98fc894f3083e53576df' => [
+            'name' => 'France',
+            'slug' => 'pays-france',
+            'tag_type' => 'pays',
+            'published' => true,
+            'description' => 'Pays'
+        ],
+        '178fa511db37ed51d56895d6d60b6785' => [
+            'name' => '87, Haute-Vienne, Nouvelle-Aquitaine',
+            'slug' => 'region-87-haute-vienne-nouvelle-aquitaine-3e1fe',
+            'tag_type' => 'region',
+            'parent' => 'cc173dc1b93f98fc894f3083e53576df',
+            'published' => true,
+            'description' => 'Région / Département auto-généré'
+        ],
+        '4215a13ffd21fb8f7dfb05d868bb8b1e' => [
+            'name' => 'Limoges',
+            'slug' => 'ville-limoges-5cf81',
+            'tag_type' => 'ville',
+            'parent' => '178fa511db37ed51d56895d6d60b6785',
+            'published' => true,
+            'citycode' => '87085',
+            'postcode' => '87000',
+            'description' => 'Limoges'
+        ],
+        '943f1b58e399bfac4c483ca822a8c428' => [
+            'name' => 'rue Rude',
+            'slug' => 'rue-rue-rude-ead3d',
+            'tag_type' => 'rue',
+            'parent' => '4215a13ffd21fb8f7dfb05d868bb8b1e',
+            'published' => true,
+            'description' => 'rue Rude'
+        ],
+        '6f99b4814cb1e3b095f9f9e8d8fadcbb' => [
+            'name' => '7',
+            'slug' => 'numero-7-1d864',
+            'tag_type' => 'numero',
+            'parent' => '943f1b58e399bfac4c483ca822a8c428',
+            'published' => true,
+            'latitude' => 6527288.21,
+            'longitude' => 562946.34,
+            'description' => '7 rue Rude 87000 Limoges'
         ]
     ]
 ];

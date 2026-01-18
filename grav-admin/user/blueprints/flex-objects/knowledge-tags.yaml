@@ -45,3 +45,51 @@ form:
       type: textarea
       label: Description
       rows: 3
+    
+    tag_type:
+      type: select
+      label: Type de Tag
+      options:
+        global: Global / Racine
+        pays: Pays
+        region: Région / Département
+        ville: Ville
+        rue: Rue / Toponyme
+        numero: Numéro
+      validate:
+        required: true
+    
+    parent:
+      type: selectize
+      label: Tag Parent
+      help: "Hiérarchie: Région > Ville > Rue > Numéro"
+      validate:
+        type: string
+      data-options@: '\Grav\Plugin\SocialCorePlugin::getKnowledgeTagsOptions'
+    
+    # --- Coordonnées Géographiques (Prioritaire pour adresse) ---
+    latitude:
+      type: text
+      label: Latitude
+      validate:
+        type: number
+    
+    longitude:
+      type: text
+      label: Longitude
+      validate:
+        type: number
+
+    # --- Métadonnées Adresse ---
+    postcode:
+        type: text
+        label: Code Postal
+    
+    citycode:
+        type: text
+        label: Code INSEE (Commune)
+    
+    context:
+        type: text
+        label: Contexte (Département/Région texte)
+
