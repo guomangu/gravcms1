@@ -1,8 +1,8 @@
 <?php
 return [
     '@class' => 'Grav\\Common\\Config\\CompiledConfig',
-    'timestamp' => 1768768648,
-    'checksum' => 'e9ee7f4b8574b3dad32e9624264bfc2a',
+    'timestamp' => 1768777091,
+    'checksum' => '83aac71fea4eeb53fa1f8a6a5c452ada',
     'files' => [
         'user/config' => [
             'media' => [
@@ -23,7 +23,7 @@ return [
             ],
             'site' => [
                 'file' => 'user/config/site.yaml',
-                'modified' => 1768693436
+                'modified' => 1768776992
             ],
             'system' => [
                 'file' => 'user/config/system.yaml',
@@ -3909,6 +3909,7 @@ node_modules'
             'routes' => [
                 '/room/(.*)' => '/sys/room',
                 '/profile/(.*)' => '/sys/profiles/dispatcher',
+                '/tags/(.*)' => '/sys/tags/dispatcher',
                 '/mesrooms' => '/mesrooms'
             ],
             'blog' => [

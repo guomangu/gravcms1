@@ -219,5 +219,35 @@
         "location": "7 rue Rude 87000 Limoges",
         "address_tag": "6f99b4814cb1e3b095f9f9e8d8fadcbb",
         "created": "2026-01-18 22:47:16"
+    },
+    "azerty": {
+        "name": "azerty",
+        "description": "azert",
+        "slug": "azerty",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "6 La Rue 50440 La Hague",
+        "address_tag": "42a466ddbbd0d509ecaadfe97a2c36bb",
+        "created": "2026-01-18 22:58:39"
+    },
+    "eciec": {
+        "name": "eciec",
+        "description": "fds",
+        "slug": "eciec",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "6 La Rue 50110 Bretteville",
+        "address_tag": "2465bebddf22e33e1734e8848295ad47",
+        "created": "2026-01-18 23:03:27"
     }
 }

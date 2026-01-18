@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledYamlFile',
     'filename' => '/home/gu/g2/grav-admin/user/config/site.yaml',
-    'modified' => 1768693436,
-    'size' => 295,
+    'modified' => 1768776992,
+    'size' => 335,
     'data' => [
         'title' => 'Social Knowledge Network',
         'default_lang' => 'fr',
@@ -17,6 +17,7 @@ return [
         'routes' => [
             '/room/(.*)' => '/sys/room',
             '/profile/(.*)' => '/sys/profiles/dispatcher',
+            '/tags/(.*)' => '/sys/tags/dispatcher',
             '/mesrooms' => '/mesrooms'
         ]
     ]

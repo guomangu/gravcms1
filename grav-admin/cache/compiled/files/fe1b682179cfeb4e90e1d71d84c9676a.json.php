@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledJsonFile',
     'filename' => '/home/gu/g2/grav-admin/user/data/flex-objects.json',
-    'modified' => 1768776436,
-    'size' => 3832,
+    'modified' => 1768777407,
+    'size' => 5926,
     'data' => [
         '72b605af2aefde5b913e3c43442834da' => [
             'id' => 'msg_696c241176bf7',
@@ -179,6 +179,92 @@ return [
             'latitude' => 6527288.21,
             'longitude' => 562946.34,
             'description' => '7 rue Rude 87000 Limoges'
+        ],
+        '6511a79dffa844dcd5f418d9fcb09e5a' => [
+            'name' => 'France',
+            'slug' => 'pays-france',
+            'tag_type' => 'pays',
+            'published' => true,
+            'description' => 'Pays'
+        ],
+        '37296cd38b4a5ec89bf29402ee2a39ea' => [
+            'name' => '50, Manche, Normandie',
+            'slug' => 'region-50-manche-normandie-f4ef9',
+            'tag_type' => 'region',
+            'parent' => '6511a79dffa844dcd5f418d9fcb09e5a',
+            'published' => true,
+            'description' => 'Région / Département auto-généré'
+        ],
+        '1f2ac11b40de213b766cffafe45569d9' => [
+            'name' => 'La Hague',
+            'slug' => 'ville-la-hague-bb425',
+            'tag_type' => 'ville',
+            'parent' => '37296cd38b4a5ec89bf29402ee2a39ea',
+            'published' => true,
+            'citycode' => '50041',
+            'postcode' => '50440',
+            'description' => 'La Hague'
+        ],
+        'd0ca05cf40a71e817338b277c01d35c4' => [
+            'name' => 'La Rue',
+            'slug' => 'rue-la-rue-5b009',
+            'tag_type' => 'rue',
+            'parent' => '1f2ac11b40de213b766cffafe45569d9',
+            'published' => true,
+            'description' => 'La Rue'
+        ],
+        '42a466ddbbd0d509ecaadfe97a2c36bb' => [
+            'name' => '6',
+            'slug' => 'numero-6-346d6',
+            'tag_type' => 'numero',
+            'parent' => 'd0ca05cf40a71e817338b277c01d35c4',
+            'published' => true,
+            'latitude' => 6959812.67,
+            'longitude' => 349811.67,
+            'description' => '6 La Rue 50440 La Hague'
+        ],
+        '8961104df7e54fa4fa9f4b80b0e7164b' => [
+            'name' => 'France',
+            'slug' => 'pays-france',
+            'tag_type' => 'pays',
+            'published' => true,
+            'description' => 'Pays'
+        ],
+        'fab823b673f7f9b0adad51f6b3e4fade' => [
+            'name' => '50, Manche, Normandie',
+            'slug' => 'region-50-manche-normandie-2b199',
+            'tag_type' => 'region',
+            'parent' => '8961104df7e54fa4fa9f4b80b0e7164b',
+            'published' => true,
+            'description' => 'Région / Département auto-généré'
+        ],
+        '96508730b2f11e425804ddb19802d225' => [
+            'name' => 'Bretteville',
+            'slug' => 'ville-bretteville-50785',
+            'tag_type' => 'ville',
+            'parent' => 'fab823b673f7f9b0adad51f6b3e4fade',
+            'published' => true,
+            'citycode' => '50077',
+            'postcode' => '50110',
+            'description' => 'Bretteville'
+        ],
+        '920049eea38dbd7b21e846b07f1497b3' => [
+            'name' => 'La Rue',
+            'slug' => 'rue-la-rue-7fc0f',
+            'tag_type' => 'rue',
+            'parent' => '96508730b2f11e425804ddb19802d225',
+            'published' => true,
+            'description' => 'La Rue'
+        ],
+        '2465bebddf22e33e1734e8848295ad47' => [
+            'name' => '6',
+            'slug' => 'numero-6-02684',
+            'tag_type' => 'numero',
+            'parent' => '920049eea38dbd7b21e846b07f1497b3',
+            'published' => true,
+            'latitude' => 6960103.36,
+            'longitude' => 373768.52,
+            'description' => '6 La Rue 50110 Bretteville'
         ]
     ]
 ];

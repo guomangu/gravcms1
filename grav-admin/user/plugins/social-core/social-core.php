@@ -1116,7 +1116,7 @@ class SocialCorePlugin extends Plugin
             }
             
             $grav['messages']->add('Room "' . $name . '" créée avec succès !', 'success');
-            $grav->redirect('/mesrooms/' . $slug);
+            $grav->redirect('/room/' . $slug);
             return;
             
         } catch (\Exception $e) {
@@ -1224,7 +1224,7 @@ class SocialCorePlugin extends Plugin
         $this->logActivity('create', 'space', $slug);
 
         // Redirect to the new space
-        $this->grav->redirect('/s/' . $slug);
+        $this->grav->redirect('/room/' . $slug);
     }
 
     /**

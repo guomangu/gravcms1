@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledYamlFile',
     'filename' => '/home/gu/g2/grav-admin/user/accounts/guang.yaml',
-    'modified' => 1768776436,
-    'size' => 321,
+    'modified' => 1768777407,
+    'size' => 346,
     'data' => [
         'state' => 'enabled',
         'email' => 'guang@gmail.com',
@@ -25,7 +25,9 @@ return [
                 5 => 'hgfds',
                 6 => 'wlallaw',
                 7 => 'masuepdld',
-                8 => 'treza'
+                8 => 'treza',
+                9 => 'azerty',
+                10 => 'eciec'
             ]
         ]
     ]

@@ -72,6 +72,26 @@
                         {% endif %}
                     </div>
                 </div>
+                
+                {# Display Address Hierarchy #}
+                {% if room.address_tag %}
+                    {% set address_chain = get_address_hierarchy(room.address_tag) %}
+                    {% if address_chain %}
+                        <div class="skn-room-address" style="margin-top: 1rem; color: rgba(255,255,255,0.9);">
+                            <i class="la la-map-marker"></i>
+                            <span class="skn-address-breadcrumbs">
+                                {% for tag in address_chain %}
+                                    <a href="/tags/{{ tag.slug }}" class="skn-address-tag" style="color: inherit; text-decoration: underline;">
+                                        {{ tag.name }}
+                                    </a>
+                                    {% if not loop.last %}
+                                        <span class="skn-address-separator" style="margin: 0 5px;">/</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                    {% endif %}
+                {% endif %}
             </div>
         </header>
 

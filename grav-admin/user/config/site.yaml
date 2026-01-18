@@ -11,4 +11,5 @@ metadata:
 routes:
   '/room/(.*)': '/sys/room'
   '/profile/(.*)': '/sys/profiles/dispatcher'
+  '/tags/(.*)': '/sys/tags/dispatcher'
   '/mesrooms': '/mesrooms'

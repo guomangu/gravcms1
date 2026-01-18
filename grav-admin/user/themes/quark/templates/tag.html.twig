@@ -1,0 +1,118 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Extract tag slug from URI #}
+{% set tag_slug = uri.route|split('/tags/')[1] %}
+
+{# Load Knowledge Tags Directory #}
+{% set tags_directory = grav.get('flex').directory('knowledge-tags') %}
+{# Try getting by key first #}
+{% set tag = tags_directory ? tags_directory.getObject(tag_slug) : null %}
+
+{# If not found by key, try searching by slug property #}
+{% if not tag and tags_directory %}
+    {% set collection = tags_directory.getCollection() %}
+    {% set tag = collection.filterBy({'slug': tag_slug}).first() %}
+{% endif %}
+
+{# Load Rooms to search #}
+{% set rooms = rooms|default([]) %}
+
+<div class="skn-container">
+    {% if tag %}
+        {# Breadcrumbs / Hierarchy #}
+        {% set hierarchy = get_address_hierarchy(tag.key) %}
+        {% if hierarchy %}
+            <div class="skn-tag-breadcrumbs" style="margin-bottom: 1rem; color: #666;">
+                {% for parent in hierarchy %}
+                    {% if parent.key != tag.key %}
+                        <a href="/tags/{{ parent.slug }}" class="skn-crumb-link">{{ parent.name }}</a>
+                        <span class="skn-crumb-sep">/</span>
+                    {% endif %}
+                {% endfor %}
+                <span class="skn-crumb-current">{{ tag.name }}</span>
+            </div>
+        {% endif %}
+
+        <header class="skn-tag-header">
+            <div class="skn-tag-icon">
+                <i class="la la-map-marker"></i>
+            </div>
+            <div class="skn-tag-info">
+                <h1>{{ tag.name }}</h1>
+                <span class="skn-badge skn-badge--{{ tag.tag_type }}">{{ tag.tag_type|capitalize }}</span>
+                {% if tag.description %}
+                    <p class="skn-tag-description">{{ tag.description }}</p>
+                {% endif %}
+            </div>
+        </header>
+
+        {# Find rooms with this tag OR children tags #}
+        {% set tagged_rooms = [] %}
+        {% for room in rooms %}
+            {% if room.address_tag %}
+                {# Check strict match first for speed #}
+                {% if room.address_tag == tag.key %}
+                    {% set tagged_rooms = tagged_rooms|merge([room]) %}
+                {% else %}
+                    {# Check if room's tag has THIS tag in its hierarchy #}
+                    {# e.g. We are visiting Paris (tag.key). Room is in Rue de la Paix (room.address_tag). #}
+                    {# get_address_hierarchy(room.address_tag) -> [France, IDF, Paris, Rue de la Paix] #}
+                    
+                    {% set room_hierarchy = get_address_hierarchy(room.address_tag) %}
+                    {% set is_in_location = false %}
+                    {% for h_tag in room_hierarchy %}
+                        {% if h_tag.key == tag.key %}
+                            {% set is_in_location = true %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if is_in_location %}
+                        {% set tagged_rooms = tagged_rooms|merge([room]) %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <section class="skn-tag-rooms">
+            <h2>Rooms à {{ tag.name }} ({{ tagged_rooms|length }})</h2>
+            
+            {% if tagged_rooms|length > 0 %}
+                <div class="skn-grid skn-grid-3">
+                    {% for room in tagged_rooms %}
+                        <a href="/room/{{ room.slug }}" class="skn-card skn-room-card">
+                            <div class="skn-room-card__header">
+                                <div class="skn-room-avatar">{{ room.name|first|upper }}</div>
+                                <div class="skn-room-info">
+                                    <h3>{{ room.name }}</h3>
+                                    <span class="skn-text-muted">{{ room.members|length }} membres</span>
+                                </div>
+                            </div>
+                            <div class="skn-room-card__body">
+                                <p>{{ room.description|striptags|truncate(100) }}</p>
+                            </div>
+                            {% if room.location %}
+                                <div class="skn-room-card__footer">
+                                    <i class="la la-map-marker"></i> {{ room.location }}
+                                </div>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="skn-empty-state">
+                    <i class="la la-search-location"></i>
+                    <p>Aucune room trouvée pour ce lieu pour le moment.</p>
+                </div>
+            {% endif %}
+        </section>
+
+    {% else %}
+        <div class="skn-error-page">
+            <h1>Tag introuvable</h1>
+            <p>Le tag <strong>{{ tag_slug }}</strong> n'existe pas.</p>
+            <a href="/" class="skn-btn skn-btn--primary">Retour à l'accueil</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
