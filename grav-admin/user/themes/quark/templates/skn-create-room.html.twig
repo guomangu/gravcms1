@@ -1,0 +1,44 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% set user = grav.user %}
+{% set user_authenticated = user.authenticated|default(false) %}
+{% set is_logged_in = user_authenticated and user.username is not empty %}
+
+<div class="skn-action-page">
+    <div class="skn-action-card">
+        {# Header avec retour #}
+        <div class="skn-action-header">
+            <a href="/mesrooms" class="skn-back-link">
+                <i class="la la-arrow-left"></i> Mes rooms
+            </a>
+        </div>
+        
+        {# Titre de l'action #}
+        <h1 class="skn-action-title">
+            <i class="la la-plus-circle"></i> Créer une Room
+        </h1>
+        <p class="skn-action-subtitle">Un espace de discussion thématique</p>
+        
+        {# Messages flash #}
+        {% include 'partials/atoms/flash-messages.html.twig' %}
+        
+        {% if is_logged_in %}
+            {# Formulaire Grav natif - Bonne pratique #}
+            <div class="skn-form-wrapper">
+                {% include "forms/form.html.twig" %}
+            </div>
+            
+            {# Info supplémentaire #}
+            <div class="skn-action-info">
+                <p><i class="la la-info-circle"></i> Les rooms publiques sont visibles par tous. Les rooms privées nécessitent une invitation.</p>
+            </div>
+        {% else %}
+            {# Non connecté #}
+            {% include 'partials/atoms/require-login.html.twig' with {
+                message: 'Connectez-vous pour créer une room'
+            } %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

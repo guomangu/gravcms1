@@ -1,0 +1,98 @@
+{# ============================================= #}
+{# PARTIAL: Item de flux d'activité détaillé     #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - activity: objet activité
+{#   - accounts: collection des comptes (optionnel)
+{#   - space_dir: directory des espaces (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set actor = activity.actor|default('Utilisateur') %}
+{% set actor_obj = accounts ? accounts.load(actor) : null %}
+{% set actor_name = actor_obj and actor_obj.exists ? actor_obj.fullname|default(actor) : actor %}
+{% set verb = activity.verb|default('action') %}
+{% set object_type = activity.object_type|default('item') %}
+{% set object_id = activity.object_id|default('') %}
+{% set timestamp = activity.timestamp|default('--') %}
+{% set context = activity.context|default(null) %}
+
+<article class="skn-feed-item">
+    <div class="skn-feed-item-left">
+        <a href="/u/{{ actor }}" class="skn-feed-avatar">
+            {{ actor_name|first|upper }}
+        </a>
+        <div class="skn-feed-line"></div>
+    </div>
+    
+    <div class="skn-feed-item-content">
+        {# Header avec acteur et action #}
+        <div class="skn-feed-item-header">
+            {{ macros.user_link(actor, actor_name) }}
+            <span class="skn-feed-action">
+                {% if verb == 'create' %}
+                    <i class="la la-plus-circle"></i>
+                {% elseif verb == 'update' %}
+                    <i class="la la-edit"></i>
+                {% elseif verb == 'join' %}
+                    <i class="la la-sign-in-alt"></i>
+                {% elseif verb == 'like' %}
+                    <i class="la la-heart"></i>
+                {% elseif verb == 'follow' %}
+                    <i class="la la-user-plus"></i>
+                {% endif %}
+                {{ macros.activity_verb(verb) }}
+            </span>
+        </div>
+        
+        {# Corps avec l'objet concerné #}
+        <div class="skn-feed-item-body">
+            {% if object_type == 'space' %}
+                {% set obj = space_dir ? space_dir.getObject(object_id) : null %}
+                <a href="/s/{{ object_id }}" class="skn-feed-object skn-feed-object-space">
+                    <span class="skn-object-icon">{{ (obj ? obj.name : object_id)|first|upper }}</span>
+                    <span class="skn-object-info">
+                        <span class="skn-object-type">Espace</span>
+                        <span class="skn-object-name">{{ obj ? obj.name : object_id }}</span>
+                    </span>
+                </a>
+            {% elseif object_type == 'user' %}
+                {% set obj = accounts ? accounts.load(object_id) : null %}
+                <a href="/u/{{ object_id }}" class="skn-feed-object skn-feed-object-user">
+                    <span class="skn-object-icon">{{ (obj and obj.exists ? obj.fullname|default(object_id) : object_id)|first|upper }}</span>
+                    <span class="skn-object-info">
+                        <span class="skn-object-type">Utilisateur</span>
+                        <span class="skn-object-name">
+                            {{ obj and obj.exists ? obj.fullname|default(object_id) : object_id }}
+                        </span>
+                    </span>
+                </a>
+            {% elseif object_type == 'page' %}
+                <div class="skn-feed-object skn-feed-object-page">
+                    <span class="skn-object-icon"><i class="la la-file-alt"></i></span>
+                    <span class="skn-object-info">
+                        <span class="skn-object-type">Page Wiki</span>
+                        <span class="skn-object-name">{{ object_id }}</span>
+                    </span>
+                </div>
+            {% else %}
+                <span class="skn-feed-object-generic">{{ object_id }}</span>
+            {% endif %}
+        </div>
+        
+        {# Footer avec timestamp et contexte #}
+        <div class="skn-feed-item-footer">
+            {{ macros.time_ago(timestamp) }}
+            {% if context and space_dir %}
+                {% set ctx_space = space_dir.getObject(context) %}
+                {% if ctx_space %}
+                    <span class="skn-feed-context">
+                        dans {{ macros.space_link(context, ctx_space.name) }}
+                    </span>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</article>

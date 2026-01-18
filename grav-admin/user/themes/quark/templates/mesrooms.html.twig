@@ -1,0 +1,110 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{% if not is_logged_in %}
+    {# Redirection vers account si non connecté #}
+    {% include 'partials/skn/require-auth.html.twig' with {
+        message: 'Connectez-vous pour voir vos rooms'
+    } only %}
+{% else %}
+    {# Récupérer les rooms de l'utilisateur #}
+    {% set my_room_slugs = grav_user.relations.spaces|default([]) %}
+    {% set my_rooms = [] %}
+    {% set recommended_rooms = [] %}
+    
+    {% for room in rooms %}
+        {% if room.slug in my_room_slugs or current_user in room.members|default([]) %}
+            {% set my_rooms = my_rooms|merge([room]) %}
+        {% else %}
+            {% set recommended_rooms = recommended_rooms|merge([room]) %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="skn-page skn-mesrooms">
+        {# Header #}
+        <header class="skn-page__header">
+            <div class="skn-container">
+                <h1><i class="la la-layer-group"></i> Mes Rooms</h1>
+                <a href="/create-room" class="skn-btn skn-btn--primary">
+                    <i class="la la-plus"></i> Créer une room
+                </a>
+            </div>
+        </header>
+
+        <div class="skn-container">
+            {# Mes rooms abonnées #}
+            <section class="skn-section">
+                <div class="skn-section__header">
+                    <h2><i class="la la-star"></i> Rooms abonnées</h2>
+                    <span class="skn-badge">{{ my_rooms|length }}</span>
+                </div>
+
+                {% if my_rooms|length > 0 %}
+                    <div class="skn-card-list skn-card-list--grid skn-card-list--col-3">
+                        {% for room in my_rooms %}
+                            {% include 'partials/skn/room-card.html.twig' with {
+                                room: room,
+                                current_user: current_user,
+                                variant: 'default'
+                            } only %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="skn-empty-state">
+                        <div class="skn-empty-state__icon">
+                            <i class="la la-inbox"></i>
+                        </div>
+                        <h3>Aucune room abonnée</h3>
+                        <p>Rejoignez des rooms pour les voir apparaître ici.</p>
+                        <a href="/explore" class="skn-btn skn-btn--primary">
+                            <i class="la la-compass"></i> Explorer les rooms
+                        </a>
+                    </div>
+                {% endif %}
+            </section>
+
+            {# Rooms recommandées #}
+            {% if recommended_rooms|length > 0 %}
+            <section class="skn-section">
+                <div class="skn-section__header">
+                    <h2><i class="la la-lightbulb"></i> Rooms recommandées</h2>
+                </div>
+
+                <div class="skn-card-list skn-card-list--grid skn-card-list--col-3">
+                    {% for room in recommended_rooms|slice(0, 6) %}
+                        {% include 'partials/skn/room-card.html.twig' with {
+                            room: room,
+                            current_user: current_user,
+                            variant: 'default'
+                        } only %}
+                    {% endfor %}
+                </div>
+
+                {% if recommended_rooms|length > 6 %}
+                    <div class="skn-section__footer">
+                        <a href="/explore" class="skn-btn skn-btn--outline">
+                            Voir plus <i class="la la-arrow-right"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            {# Formulaire création rapide #}
+            <section class="skn-section">
+                <div class="skn-section__header">
+                    <h2><i class="la la-plus-circle"></i> Créer une nouvelle room</h2>
+                </div>
+                
+                {% include 'partials/skn/form-create-room.html.twig' with {
+                    current_user: current_user,
+                    compact: true
+                } only %}
+            </section>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

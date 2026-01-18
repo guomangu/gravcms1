@@ -1,0 +1,53 @@
+{# ============================================= #}
+{# PARTIAL: Section documents wiki d'un espace   #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - space: objet espace
+{#   - pages: collection de pages Grav
+{#   - is_member: bool
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<section class="skn-card skn-card-lg">
+    <div class="skn-card-header-row">
+        <h2 class="skn-card-title"><i class="la la-book"></i> Documents du Wiki</h2>
+        {% if is_member %}
+            {{ macros.btn('/admin/pages', 'Nouveau document', 'plus', 'outline', 'sm') }}
+        {% endif %}
+    </div>
+    
+    <div class="skn-documents-list">
+        {% set has_docs = false %}
+        {% for p in pages.all %}
+            {% if p.header.space_slug is defined and p.header.space_slug == space.slug %}
+                {% set has_docs = true %}
+                <a href="{{ p.url }}" class="skn-document-item">
+                    <div class="skn-document-icon">
+                        <i class="la la-file-alt"></i>
+                    </div>
+                    <div class="skn-document-info">
+                        <span class="skn-document-title">{{ p.title }}</span>
+                        <span class="skn-document-meta">
+                            Modifié le {{ p.date|date('d/m/Y') }}
+                        </span>
+                    </div>
+                    <i class="la la-chevron-right skn-document-arrow"></i>
+                </a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if not has_docs %}
+            {% include 'partials/social/empty-state.html.twig' with {
+                icon: 'folder-open',
+                message: 'Aucun document dans cet espace.',
+                cta_url: is_member ? '/admin/pages' : null,
+                cta_label: 'Créer le premier document',
+                cta_icon: 'plus',
+                current_user: is_member ? 'member' : null,
+                variant: 'small'
+            } only %}
+        {% endif %}
+    </div>
+</section>

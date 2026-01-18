@@ -1,0 +1,87 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{% set user_relations = grav_user.relations|default({}) %}
+{% set user_room_slugs = user_relations.spaces|default([]) %}
+
+<div class="skn-page-content">
+    {# Header avec action principale #}
+    <header class="skn-page-header">
+        <div class="skn-page-header__info">
+            <h1><i class="la la-layer-group"></i> Mes Rooms</h1>
+            <p>Vos espaces de discussion</p>
+        </div>
+        <a href="/create-room" class="skn-btn skn-btn--primary">
+            <i class="la la-plus"></i> Nouvelle room
+        </a>
+    </header>
+
+    {# Messages flash #}
+    {% include 'partials/atoms/flash-messages.html.twig' %}
+
+    {% if is_logged_in %}
+        {# Rooms de l'utilisateur #}
+        {% set my_rooms = [] %}
+        {% for room in rooms %}
+            {% if room.slug in user_room_slugs or current_user in room.members|default([]) or current_user in room.admins|default([]) %}
+                {% set my_rooms = my_rooms|merge([room]) %}
+            {% endif %}
+        {% endfor %}
+
+        {% if my_rooms|length > 0 %}
+            <section class="skn-section">
+                <div class="skn-card-grid">
+                    {% for room in my_rooms %}
+                        {% set is_admin = current_user in room.admins|default([]) %}
+                        <div class="skn-room-card-wrapper">
+                            {% include 'partials/atoms/room-card.html.twig' with {room: room} %}
+                            {% if is_admin %}
+                                <span class="skn-room-card__admin-badge">
+                                    <i class="la la-crown"></i> Admin
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% else %}
+            {% include 'partials/atoms/empty-state.html.twig' with {
+                icon: 'la-folder-open',
+                title: 'Aucune room',
+                message: 'Vous n\'avez pas encore rejoint de room',
+                action_url: '/explore',
+                action_label: 'Explorer les rooms'
+            } %}
+        {% endif %}
+
+        {# Rooms recommandées (celles où l'utilisateur n'est pas membre) #}
+        {% set recommended = [] %}
+        {% for room in rooms %}
+            {% set is_in_room = current_user in room.members|default([]) or current_user in room.admins|default([]) %}
+            {% if not is_in_room %}
+                {% set recommended = recommended|merge([room]) %}
+            {% endif %}
+        {% endfor %}
+
+        {% if recommended|length > 0 %}
+            <section class="skn-section">
+                <header class="skn-section__header">
+                    <h2><i class="la la-lightbulb"></i> Rooms suggérées</h2>
+                </header>
+                <div class="skn-card-grid">
+                    {% for room in recommended|slice(0, 3) %}
+                        {% include 'partials/atoms/room-card.html.twig' with {room: room} %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% else %}
+        {% include 'partials/atoms/require-login.html.twig' with {
+            message: 'Connectez-vous pour voir vos rooms'
+        } %}
+    {% endif %}
+</div>
+{% endblock %}

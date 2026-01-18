@@ -1,0 +1,20 @@
+{# ============================================= #}
+{# ATOM: Bulle de message                      #}
+{# ============================================= #}
+{% set sender = message.sender|default('Anonyme') %}
+{% set content = message.content|default('') %}
+{% set timestamp = message.timestamp|default(null) %}
+{% set is_own = sender == grav.user.username|default('') %}
+
+<div class="skn-message{% if is_own %} skn-message--own{% endif %}">
+    <div class="skn-message__avatar">
+        {{ sender|first|upper }}
+    </div>
+    <div class="skn-message__content">
+        <span class="skn-message__sender">{{ sender }}</span>
+        <p class="skn-message__text">{{ content|e }}</p>
+        {% if timestamp %}
+            <span class="skn-message__time">{{ timestamp|date('H:i') }}</span>
+        {% endif %}
+    </div>
+</div>

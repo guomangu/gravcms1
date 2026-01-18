@@ -1,0 +1,57 @@
+{# ============================================= #}
+{# PARTIAL: Liste de cards avec état vide        #}
+{# ============================================= #}
+{# 
+{# Variables:
+{#   - items: collection d'items
+{#   - item_template: template pour chaque item
+{#   - empty_icon: icône si vide
+{#   - empty_title: titre si vide
+{#   - empty_message: message si vide
+{#   - create_url: URL création (optionnel)
+{#   - create_label: label bouton création
+{#   - columns: nombre de colonnes (2, 3, 4)
+{#   - variant: 'grid' | 'list' | 'masonry'
+{# --------------------------------------------- #}
+
+{% set variant = variant|default('grid') %}
+{% set columns = columns|default(3) %}
+{% set items = items|default([]) %}
+
+{% if items|length > 0 %}
+    <div class="skn-card-list skn-card-list--{{ variant }} skn-card-list--col-{{ columns }}">
+        {% for item in items %}
+            {% if item_template is defined %}
+                {% include item_template with {item: item} only %}
+            {% else %}
+                {# Rendu par défaut #}
+                {% include 'partials/skn/card.html.twig' with {
+                    title: item.name|default(item.title|default('Item')),
+                    description: item.description|default(''),
+                    link: item.url|default('#')
+                } only %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% else %}
+    {# État vide #}
+    <div class="skn-empty-state">
+        {% if empty_icon is defined %}
+            <div class="skn-empty-state__icon">
+                <i class="la la-{{ empty_icon }}"></i>
+            </div>
+        {% endif %}
+        
+        <h3 class="skn-empty-state__title">{{ empty_title|default('Aucun élément') }}</h3>
+        
+        {% if empty_message is defined %}
+            <p class="skn-empty-state__message">{{ empty_message }}</p>
+        {% endif %}
+        
+        {% if create_url is defined %}
+            <a href="{{ create_url }}" class="skn-btn skn-btn--primary">
+                <i class="la la-plus"></i> {{ create_label|default('Créer') }}
+            </a>
+        {% endif %}
+    </div>
+{% endif %}

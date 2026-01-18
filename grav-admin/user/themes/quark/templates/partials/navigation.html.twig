@@ -1,0 +1,22 @@
+{% set grav_user = grav.user %}
+{% set current_user = grav_user.username|default(null) %}
+{% set user_authenticated = grav_user.authenticated|default(false) %}
+{% set is_logged_in = user_authenticated and current_user is not empty %}
+{% set current_path = uri.path %}
+
+<ul class="skn-nav">
+    <li class="{% if current_path == '/' %}active{% endif %}">
+        <a href="/"><i class="la la-home"></i> Accueil</a>
+    </li>
+    <li class="{% if '/explore' in current_path %}active{% endif %}">
+        <a href="/explore"><i class="la la-compass"></i> Explorer</a>
+    </li>
+    {% if is_logged_in %}
+        <li class="{% if '/mesrooms' in current_path %}active{% endif %}">
+            <a href="/mesrooms"><i class="la la-layer-group"></i> Mes Rooms</a>
+        </li>
+        <li class="{% if '/create-room' in current_path %}active{% endif %}">
+            <a href="/create-room"><i class="la la-plus-circle"></i> Creer</a>
+        </li>
+    {% endif %}
+</ul>

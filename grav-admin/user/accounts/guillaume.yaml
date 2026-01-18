@@ -1,0 +1,33 @@
+state: enabled
+email: gyomang@gmail.com
+fullname: 'Guillaume Anguenot'
+title: admin
+hashed_password: $2y$12$xaX4HsX7SEEhaIZo.jop5OVDXA8RWWoqo/iz3n.D/hFi3feRtGvfq
+language: en
+content_editor: default
+twofa_enabled: false
+twofa_secret: JOP5CBYCYXHMUB36S6WHOJGLGDNTWRKZ
+avatar: {  }
+access:
+  site:
+    login: true
+  admin:
+    login: true
+    super: true
+profile:
+  fullname: 'Guillaume Anguenot'
+  bio: "Passionné par l'architecture logicielle et les systèmes distribués.\nJ'explore les possibilités de Grav CMS comme plateforme de wiki social.\n"
+  expertise:
+    - PHP
+    - JavaScript
+    - 'Architecture Logicielle'
+    - 'Grav CMS'
+    - 'Intelligence Artificielle'
+relations:
+  following: {  }
+  followers: {  }
+  spaces:
+    - demo-ia
+    - dev-web
+    - grav-cms
+    - la-chambre-a-gu

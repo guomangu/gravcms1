@@ -1,0 +1,66 @@
+{# ============================================= #}
+{# PARTIAL: État vide générique avec CTA         #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - icon: icône Line Awesome (ex: 'folder-open')
+{#   - title: titre du message
+{#   - message: description (optionnel)
+{#   - cta_url: URL du bouton d'action (optionnel)
+{#   - cta_label: Label du bouton (optionnel)
+{#   - cta_icon: Icône du bouton (optionnel)
+{#   - cta_style: Style du bouton (optionnel)
+{#   - alt_url: URL alternative si non connecté (optionnel)
+{#   - alt_label: Label alternatif (optionnel)
+{#   - variant: 'default' | 'large' | 'small' | 'inline' (optionnel)
+{#   - current_user: utilisateur connecté (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('default') %}
+
+{% if variant == 'inline' %}
+    {# Variante inline minimale #}
+    <div class="skn-empty-state skn-empty-state--inline">
+        {% if icon %}<i class="la la-{{ icon }}"></i> {% endif %}
+        <span>{{ title }}</span>
+    </div>
+{% else %}
+    {# Variantes standard #}
+    <div class="skn-empty-state skn-empty-state--{{ variant }}">
+        {% if icon %}
+            <div class="skn-empty-state__icon">
+                <i class="la la-{{ icon }}"></i>
+            </div>
+        {% endif %}
+        
+        {% if title %}
+            <h3 class="skn-empty-state__title">{{ title }}</h3>
+        {% endif %}
+        
+        {% if message %}
+            <p class="skn-empty-state__message">{{ message }}</p>
+        {% endif %}
+        
+        {# Actions conditionnelles selon connexion #}
+        {% if cta_url or alt_url %}
+            <div class="skn-empty-state__actions">
+                {% if current_user %}
+                    {# Utilisateur connecté - CTA principal #}
+                    {% if cta_url %}
+                        {{ macros.btn(cta_url, cta_label|default('Créer'), cta_icon|default('plus'), cta_style|default('primary')) }}
+                    {% endif %}
+                {% else %}
+                    {# Non connecté - CTA alternatif #}
+                    {% if alt_url %}
+                        <p class="skn-muted">{{ alt_message|default('Connectez-vous pour continuer.') }}</p>
+                        {{ macros.btn(alt_url, alt_label|default('Se connecter'), 'sign-in-alt', 'outline') }}
+                    {% elseif cta_url %}
+                        {{ macros.btn(cta_url, cta_label|default('Découvrir'), cta_icon, 'outline') }}
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

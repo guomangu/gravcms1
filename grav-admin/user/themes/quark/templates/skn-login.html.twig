@@ -1,0 +1,92 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% set user = grav.user %}
+
+<div class="skn-auth-page">
+    <div class="skn-auth-card">
+        {# Logo #}
+        {% include 'partials/atoms/logo.html.twig' %}
+        
+        {% if user.authenticated and user.authorized %}
+            {# Déjà connecté #}
+            <h1 class="skn-auth-title">Bienvenue !</h1>
+            <p class="skn-auth-subtitle">Vous êtes connecté en tant que <strong>{{ user.fullname|default(user.username) }}</strong></p>
+            
+            <div class="skn-auth-actions">
+                <a href="/" class="skn-btn skn-btn--primary skn-btn--block">
+                    <i class="la la-home"></i> Accueil
+                </a>
+                <a href="{{ uri.addNonce(base_url ~ '/login/task:login.logout', 'logout-form', 'logout-nonce') }}" class="skn-btn skn-btn--outline skn-btn--block">
+                    <i class="la la-sign-out-alt"></i> Déconnexion
+                </a>
+            </div>
+        {% else %}
+            {# Formulaire de connexion #}
+            <h1 class="skn-auth-title">Connexion</h1>
+            <p class="skn-auth-subtitle">Accédez à votre compte</p>
+            
+            {# Messages flash système #}
+            {% include 'partials/atoms/flash-messages.html.twig' %}
+            
+            {# Zone pour les erreurs JS #}
+            <div id="login-errors" class="skn-login-errors"></div>
+            
+            <div class="skn-form-wrapper">
+                <form method="post" action="{{ base_url }}{{ page.route }}" class="skn-form" id="login-form">
+                    <input type="hidden" name="task" value="login.login" />
+                    {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="username">
+                            <i class="la la-user"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-input"
+                               placeholder="votre.pseudo"
+                               required
+                               autofocus
+                               autocomplete="username"
+                               value="{{ uri.query('username')|e }}" />
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="password">
+                            <i class="la la-lock"></i> Mot de passe
+                        </label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input"
+                               placeholder="••••••••"
+                               required
+                               autocomplete="current-password" />
+                    </div>
+                    
+                    <div class="form-field skn-form-row">
+                        <label class="skn-checkbox">
+                            <input type="checkbox" name="rememberme" value="1" />
+                            <span>Se souvenir de moi</span>
+                        </label>
+                        <a href="/forgot" class="skn-link skn-link--small">Mot de passe oublié ?</a>
+                    </div>
+                    
+                    <button type="submit" class="button skn-btn skn-btn--primary skn-btn--block" id="login-submit">
+                        <i class="la la-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+            </div>
+            
+            {# Action secondaire #}
+            <div class="skn-auth-footer">
+                <p>Pas encore de compte ?</p>
+                <a href="/register" class="skn-link">Créer un compte</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Le JS de validation est chargé via skn-auth.js #}
+{% endblock %}

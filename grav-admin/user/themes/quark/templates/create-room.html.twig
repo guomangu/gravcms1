@@ -1,0 +1,69 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+<div class="skn-page skn-create-room">
+    <div class="skn-container">
+        {# Header #}
+        <header class="skn-page__header">
+            <h1><i class="la la-plus-circle"></i> Créer une Room</h1>
+            <p>Créez un espace de discussion thématique pour votre communauté.</p>
+        </header>
+
+        <div class="skn-create-room__layout">
+            {# Formulaire de création #}
+            <div class="skn-create-room__form">
+                {% include 'partials/skn/form-create-room.html.twig' with {
+                    current_user: current_user,
+                    compact: false
+                } only %}
+            </div>
+
+            {# Liste des rooms existantes #}
+            <div class="skn-create-room__list">
+                <div class="skn-card">
+                    <div class="skn-card__header">
+                        <h3><i class="la la-layer-group"></i> Rooms existantes ({{ rooms_count }})</h3>
+                    </div>
+                    
+                    {% if rooms_count > 0 %}
+                        <div class="skn-room-mini-list">
+                            {% for room in rooms|slice(0, 10) %}
+                                <a href="/room/{{ room.slug }}" class="skn-room-mini">
+                                    <span class="skn-room-mini__avatar">
+                                        {{ room.name|default('?')|first|upper }}
+                                    </span>
+                                    <span class="skn-room-mini__info">
+                                        <span class="skn-room-mini__name">{{ room.name|default('Sans nom') }}</span>
+                                        <span class="skn-room-mini__meta">
+                                            {{ room.members|default([])|length }} membres
+                                        </span>
+                                    </span>
+                                    <span class="skn-badge skn-badge--{{ room.access_level|default('public') }} skn-badge--sm">
+                                        {{ room.access_level|default('public') }}
+                                    </span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if rooms_count > 10 %}
+                            <div class="skn-card__footer">
+                                <a href="/explore" class="skn-link">
+                                    Voir toutes les rooms <i class="la la-arrow-right"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="skn-empty-state skn-empty-state--sm">
+                            <p>Aucune room pour le moment</p>
+                            <p class="skn-muted">Soyez le premier à en créer une !</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

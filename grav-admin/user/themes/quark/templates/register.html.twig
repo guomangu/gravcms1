@@ -1,0 +1,118 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+<div class="skn-auth-page">
+    <div class="skn-auth-card skn-auth-card-lg">
+        <div class="skn-auth-header">
+            <div class="skn-auth-logo">
+                <span class="skn-gradient-text">SKN</span>
+            </div>
+            <h1>Créer un compte</h1>
+            <p>Rejoignez la communauté et partagez vos connaissances.</p>
+        </div>
+
+        {% include 'partials/messages.html.twig' %}
+
+        <form method="post" action="{{ page.url }}" class="skn-auth-form">
+            <input type="hidden" name="task" value="login.register" />
+            {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+
+            <div class="skn-form-row-2col">
+                <div class="skn-form-group">
+                    <label for="fullname">
+                        <i class="la la-id-card"></i> Nom complet
+                    </label>
+                    <input type="text" 
+                           id="fullname" 
+                           name="data[fullname]" 
+                           class="skn-input"
+                           placeholder="Jean Dupont"
+                           required
+                           autocomplete="name" />
+                </div>
+
+                <div class="skn-form-group">
+                    <label for="username">
+                        <i class="la la-at"></i> Nom d'utilisateur
+                    </label>
+                    <input type="text" 
+                           id="username" 
+                           name="data[username]" 
+                           class="skn-input"
+                           placeholder="jean.dupont"
+                           required
+                           autocomplete="username"
+                           pattern="[a-z0-9_\-\.]+"
+                           title="Lettres minuscules, chiffres, tirets et points uniquement" />
+                </div>
+            </div>
+
+            <div class="skn-form-group">
+                <label for="email">
+                    <i class="la la-envelope"></i> Adresse email
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="data[email]" 
+                       class="skn-input"
+                       placeholder="jean.dupont@example.com"
+                       required
+                       autocomplete="email" />
+            </div>
+
+            <div class="skn-form-row-2col">
+                <div class="skn-form-group">
+                    <label for="password1">
+                        <i class="la la-lock"></i> Mot de passe
+                    </label>
+                    <input type="password" 
+                           id="password1" 
+                           name="data[password1]" 
+                           class="skn-input"
+                           placeholder="••••••••"
+                           required
+                           autocomplete="new-password"
+                           minlength="8" />
+                </div>
+
+                <div class="skn-form-group">
+                    <label for="password2">
+                        <i class="la la-lock"></i> Confirmer le mot de passe
+                    </label>
+                    <input type="password" 
+                           id="password2" 
+                           name="data[password2]" 
+                           class="skn-input"
+                           placeholder="••••••••"
+                           required
+                           autocomplete="new-password"
+                           minlength="8" />
+                </div>
+            </div>
+
+            <div class="skn-form-group">
+                <label class="skn-checkbox">
+                    <input type="checkbox" name="accept_terms" value="1" required />
+                    <span class="skn-checkmark"></span>
+                    J'accepte les <a href="#" class="skn-link">conditions d'utilisation</a> et la <a href="#" class="skn-link">politique de confidentialité</a>
+                </label>
+            </div>
+
+            <button type="submit" class="skn-btn skn-btn-primary skn-btn-block">
+                <i class="la la-user-plus"></i> Créer mon compte
+            </button>
+        </form>
+
+        <div class="skn-auth-footer">
+            <p>Déjà inscrit ?</p>
+            <a href="{{ base_url }}/login" class="skn-btn skn-btn-outline skn-btn-block">
+                <i class="la la-sign-in-alt"></i> Se connecter
+            </a>
+        </div>
+    </div>
+
+    <div class="skn-auth-bg">
+        <div class="skn-auth-bg-pattern"></div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% set user = grav.user %}
+
+<div class="skn-auth-page">
+    <div class="skn-auth-card">
+        {# Logo #}
+        {% include 'partials/atoms/logo.html.twig' %}
+        
+        {% if user.authenticated %}
+            {# Déjà connecté #}
+            <h1 class="skn-auth-title">Déjà connecté</h1>
+            <p class="skn-auth-subtitle">Vous êtes déjà connecté en tant que <strong>{{ user.username }}</strong></p>
+            
+            <div class="skn-auth-actions">
+                <a href="/" class="skn-btn skn-btn--primary skn-btn--block">
+                    <i class="la la-home"></i> Accueil
+                </a>
+            </div>
+        {% else %}
+            {# Formulaire de récupération #}
+            <h1 class="skn-auth-title">Mot de passe oublié ?</h1>
+            <p class="skn-auth-subtitle">Entrez votre email pour recevoir un lien de réinitialisation</p>
+            
+            {# Messages flash système #}
+            {% include 'partials/atoms/flash-messages.html.twig' %}
+            
+            {# Zone pour les erreurs JS #}
+            <div id="forgot-errors" class="skn-login-errors"></div>
+            
+            <div class="skn-form-wrapper">
+                {% include 'forms/form.html.twig' %}
+            </div>
+            
+            {# Action secondaire #}
+            <div class="skn-auth-footer">
+                <p>Vous vous souvenez ?</p>
+                <a href="/login" class="skn-link">Retour à la connexion</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Le JS de validation est chargé via skn-auth.js #}
+{% endblock %}

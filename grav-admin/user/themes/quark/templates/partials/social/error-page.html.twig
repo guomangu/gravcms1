@@ -1,0 +1,42 @@
+{# ============================================= #}
+{# PARTIAL: Page d'erreur générique              #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - icon: icône Line Awesome
+{#   - title: titre de l'erreur
+{#   - message: description (peut contenir du HTML)
+{#   - cta_url: URL du bouton principal
+{#   - cta_label: Label du bouton
+{#   - cta_icon: Icône du bouton
+{#   - alt_url: URL alternative (optionnel)
+{#   - alt_label: Label alternatif (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<div class="skn-error-page">
+    {% if icon %}
+        <div class="skn-error-icon">
+            <i class="la la-{{ icon }}"></i>
+        </div>
+    {% endif %}
+    
+    {% if title %}
+        <h1>{{ title }}</h1>
+    {% endif %}
+    
+    {% if message %}
+        <p>{{ message|raw }}</p>
+    {% endif %}
+    
+    <div class="skn-error-actions">
+        {% if cta_url %}
+            {{ macros.btn(cta_url, cta_label|default('Retour'), cta_icon|default('arrow-left'), 'primary') }}
+        {% endif %}
+        
+        {% if alt_url %}
+            {{ macros.btn(alt_url, alt_label|default('Autre action'), null, 'outline') }}
+        {% endif %}
+    </div>
+</div>

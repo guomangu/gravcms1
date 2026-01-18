@@ -1,0 +1,224 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{# Récupération du slug depuis l'URL #}
+{% set room_slug = uri.path|split('/room/')|last %}
+{# Trouver la room dans le tableau rooms (chargé depuis JSON) #}
+{% set room = rooms[room_slug] is defined ? rooms[room_slug] : null %}
+
+{% if room %}
+    {% set members = room.members|default([]) %}
+    {% set admins = room.admins|default([]) %}
+    {% set is_member = is_logged_in and (current_user.username in members) %}
+    {% set is_admin = is_logged_in and (current_user in admins) %}
+    
+    {# Récupérer les messages de cette room #}
+    {% set room_messages = [] %}
+    {% for msg in messages %}
+        {% if msg.channel_type == 'space' and msg.channel_id == room_slug %}
+            {% set room_messages = room_messages|merge([msg]) %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="skn-room-page">
+        {# Header de la room #}
+        <header class="skn-room__header">
+            <div class="skn-room__header-bg"></div>
+            <div class="skn-container">
+                <div class="skn-room__header-content">
+                    <div class="skn-room__avatar">
+                        {{ room.name|default('?')|first|upper }}
+                    </div>
+                    <div class="skn-room__info">
+                        <h1>{{ room.name|default('Room sans nom') }}</h1>
+                        <div class="skn-room__meta">
+                            <span class="skn-badge skn-badge--{{ room.access_level|default('public') }}">
+                                {{ room.access_level|default('public')|capitalize }}
+                            </span>
+                            <span><i class="la la-users"></i> {{ members|length }} membres</span>
+                        </div>
+                    </div>
+                    <div class="skn-room__actions">
+                        {% if is_admin %}
+                            <a href="/admin/flex-objects/social-spaces/{{ room_slug }}" class="skn-btn skn-btn--outline">
+                                <i class="la la-cog"></i> Gérer
+                            </a>
+                        {% endif %}
+                        {% if is_member and not is_admin %}
+                            <form method="post" action="/social-action" class="skn-inline-form">
+                                <input type="hidden" name="action" value="leave-space" />
+                                <input type="hidden" name="target" value="{{ room_slug }}" />
+                                {{ nonce_field('social-action', 'social-nonce')|raw }}
+                                <button type="submit" class="skn-btn skn-btn--outline skn-btn--danger">
+                                    <i class="la la-sign-out-alt"></i> Quitter
+                                </button>
+                            </form>
+                        {% elseif not is_member and is_logged_in %}
+                            <form method="post" action="/social-action" class="skn-inline-form">
+                                <input type="hidden" name="action" value="join-space" />
+                                <input type="hidden" name="target" value="{{ room_slug }}" />
+                                {{ nonce_field('social-action', 'social-nonce')|raw }}
+                                <button type="submit" class="skn-btn skn-btn--primary">
+                                    <i class="la la-sign-in-alt"></i> Rejoindre
+                                </button>
+                            </form>
+                        {% elseif not is_logged_in %}
+                            <a href="/login?redirect=/room/{{ room_slug }}" class="skn-btn skn-btn--primary">
+                                <i class="la la-sign-in-alt"></i> Se connecter pour rejoindre
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="skn-container">
+            <div class="skn-room__layout">
+                {# Sidebar - Infos room #}
+                <aside class="skn-room__sidebar">
+                    {# Description #}
+                    <div class="skn-card">
+                        <h3><i class="la la-info-circle"></i> À propos</h3>
+                        {% if room.description %}
+                            <div class="skn-room__description">
+                                {{ room.description|markdown }}
+                            </div>
+                        {% else %}
+                            <p class="skn-muted">Aucune description</p>
+                        {% endif %}
+                    </div>
+
+                    {# Membres #}
+                    <div class="skn-card">
+                        <h3><i class="la la-users"></i> Membres ({{ members|length }})</h3>
+                        <div class="skn-member-list">
+                            {% for member_id in members|slice(0, 10) %}
+                                {% set member = accounts ? accounts.load(member_id) : null %}
+                                <a href="/u/{{ member_id }}" class="skn-member-chip{% if member_id in admins %} skn-member-chip--admin{% endif %}">
+                                    <span class="skn-member-chip__avatar">
+                                        {{ (member and member.exists ? member.fullname|default(member_id) : member_id)|first|upper }}
+                                    </span>
+                                    <span class="skn-member-chip__name">
+                                        {{ member and member.exists ? member.fullname|default(member_id) : member_id }}
+                                    </span>
+                                    {% if member_id in admins %}
+                                        <i class="la la-shield-alt" title="Admin"></i>
+                                    {% endif %}
+                                </a>
+                            {% else %}
+                                <p class="skn-muted">Aucun membre</p>
+                            {% endfor %}
+                            {% if members|length > 10 %}
+                                <span class="skn-member-more">+{{ members|length - 10 }} autres</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </aside>
+
+                {# Zone principale - Discussion #}
+                <main class="skn-room__main">
+                    <div class="skn-card skn-card--chat">
+                        <div class="skn-card__header">
+                            <h3>
+                                <i class="la la-comments"></i> 
+                                {% if is_member %}Discussion interne{% else %}Discussion publique{% endif %}
+                            </h3>
+                        </div>
+
+                        {# Zone des messages #}
+                        <div class="skn-chat__messages" id="chat-messages">
+                            {% if room_messages|length > 0 %}
+                                {% for msg in room_messages %}
+                                    {% set sender = accounts ? accounts.load(msg.sender) : null %}
+                                    {% set is_own = current_user == msg.sender %}
+                                    <div class="skn-message{% if is_own %} skn-message--own{% endif %}">
+                                        {% if not is_own %}
+                                            <a href="/u/{{ msg.sender }}" class="skn-message__avatar">
+                                                {{ (sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender)|first|upper }}
+                                            </a>
+                                        {% endif %}
+                                        <div class="skn-message__content">
+                                            {% if not is_own %}
+                                                <span class="skn-message__sender">
+                                                    {{ sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender }}
+                                                </span>
+                                            {% endif %}
+                                            <div class="skn-message__bubble">
+                                                {{ msg.content|nl2br }}
+                                            </div>
+                                            <span class="skn-message__time">{{ msg.timestamp|default('--')|slice(-8, 5) }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="skn-chat__empty">
+                                    <i class="la la-comments"></i>
+                                    <p>Aucun message</p>
+                                    <p class="skn-muted">Soyez le premier à écrire !</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Zone de saisie #}
+                        {% if is_logged_in %}
+                            {% if is_member %}
+                                <form method="post" action="/send-message" class="skn-chat__input">
+                                    <input type="hidden" name="channel_type" value="space" />
+                                    <input type="hidden" name="channel_id" value="{{ room_slug }}" />
+                                    {{ nonce_field('send-message', 'message-nonce')|raw }}
+                                    
+                                    <textarea name="content" 
+                                              placeholder="Écrire un message..." 
+                                              class="skn-input"
+                                              rows="1"
+                                              required></textarea>
+                                    <button type="submit" class="skn-btn skn-btn--primary">
+                                        <i class="la la-paper-plane"></i>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <div class="skn-chat__locked">
+                                    <i class="la la-lock"></i>
+                                    <span>Rejoignez la room pour participer à la discussion interne</span>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="skn-chat__locked">
+                                <i class="la la-lock"></i>
+                                <a href="/login?redirect=/room/{{ room_slug }}">Connectez-vous</a> pour participer
+                            </div>
+                        {% endif %}
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Auto-scroll vers le bas
+    const chatEl = document.getElementById('chat-messages');
+    if (chatEl) chatEl.scrollTop = chatEl.scrollHeight;
+    </script>
+
+{% else %}
+    {# Room non trouvée #}
+    <div class="skn-error-page">
+        <div class="skn-error-page__icon">
+            <i class="la la-folder-minus"></i>
+        </div>
+        <h1>Room introuvable</h1>
+        <p>La room <strong>{{ room_slug }}</strong> n'existe pas.</p>
+        <div class="skn-error-page__actions">
+            <a href="/" class="skn-btn skn-btn--primary">
+                <i class="la la-home"></i> Accueil
+            </a>
+            <a href="/create-room" class="skn-btn skn-btn--outline">
+                <i class="la la-plus"></i> Créer une room
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

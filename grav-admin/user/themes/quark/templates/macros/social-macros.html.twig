@@ -1,0 +1,194 @@
+{# ============================================= #}
+{# SOCIAL KNOWLEDGE NETWORK - MACROS MODULAIRES #}
+{# ============================================= #}
+
+{# --------------------------------------------- #}
+{# MACRO: Avatar générique                       #}
+{# Usage: {{ macros.avatar(name, size, link) }}  #}
+{# --------------------------------------------- #}
+{% macro avatar(name, size, link, css_class) %}
+    {% set initial = name|default('?')|first|upper %}
+    {% set size_class = size|default('md') %}
+    {% set extra_class = css_class|default('') %}
+    
+    {% if link %}
+        <a href="{{ link }}" class="skn-avatar skn-avatar-{{ size_class }} {{ extra_class }}">
+            {{ initial }}
+        </a>
+    {% else %}
+        <span class="skn-avatar skn-avatar-{{ size_class }} {{ extra_class }}">
+            {{ initial }}
+        </span>
+    {% endif %}
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Badge de statut                        #}
+{# Usage: {{ macros.badge(type, label) }}        #}
+{# --------------------------------------------- #}
+{% macro badge(type, label) %}
+    <span class="skn-badge skn-badge-{{ type|default('default') }}">
+        {{ label|default(type)|capitalize }}
+    </span>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Icône avec label                       #}
+{# Usage: {{ macros.icon_label(icon, text) }}    #}
+{# --------------------------------------------- #}
+{% macro icon_label(icon, text, title) %}
+    <span class="skn-icon-label" {% if title %}title="{{ title }}"{% endif %}>
+        <i class="la la-{{ icon }}"></i>
+        <span>{{ text }}</span>
+    </span>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Bouton CTA                             #}
+{# Usage: {{ macros.btn(href, label, icon) }}    #}
+{# --------------------------------------------- #}
+{% macro btn(href, label, icon, style, size) %}
+    {% set btn_style = style|default('primary') %}
+    {% set btn_size = size ? 'skn-btn-' ~ size : '' %}
+    
+    <a href="{{ href }}" class="skn-btn skn-btn-{{ btn_style }} {{ btn_size }}">
+        {% if icon %}<i class="la la-{{ icon }}"></i> {% endif %}{{ label }}
+    </a>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Lien utilisateur                       #}
+{# Usage: {{ macros.user_link(username, name) }} #}
+{# --------------------------------------------- #}
+{% macro user_link(username, fullname) %}
+    <a href="/u/{{ username }}" class="skn-link-user">
+        {{ fullname|default(username) }}
+    </a>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Lien espace                            #}
+{# Usage: {{ macros.space_link(slug, name) }}    #}
+{# --------------------------------------------- #}
+{% macro space_link(slug, name) %}
+    <a href="/s/{{ slug }}" class="skn-link-space">
+        {{ name|default(slug) }}
+    </a>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Verbe d'activité traduit               #}
+{# Usage: {{ macros.activity_verb(verb) }}       #}
+{# --------------------------------------------- #}
+{% macro activity_verb(verb) %}
+    {% set verbs = {
+        'create': 'a créé',
+        'update': 'a modifié',
+        'delete': 'a supprimé',
+        'join': 'a rejoint',
+        'leave': 'a quitté',
+        'like': 'a aimé',
+        'follow': 'suit maintenant',
+        'unfollow': 'ne suit plus',
+        'comment': 'a commenté',
+        'share': 'a partagé',
+        'post': 'a publié'
+    } %}
+    {{ verbs[verb]|default(verb) }}
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Timestamp relatif                      #}
+{# Usage: {{ macros.time_ago(timestamp) }}       #}
+{# --------------------------------------------- #}
+{% macro time_ago(timestamp) %}
+    <time class="skn-time-ago" datetime="{{ timestamp }}">
+        {{ timestamp|default('--') }}
+    </time>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Section header avec lien               #}
+{# Usage: {{ macros.section_header(...) }}       #}
+{# --------------------------------------------- #}
+{% macro section_header(title, icon, link_url, link_text) %}
+    <div class="skn-section-header">
+        <h2>
+            {% if icon %}<i class="la la-{{ icon }}"></i> {% endif %}
+            {{ title }}
+        </h2>
+        {% if link_url %}
+            <a href="{{ link_url }}" class="skn-link">
+                {{ link_text|default('Voir tout') }} <i class="la la-arrow-right"></i>
+            </a>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Compteur de stats                      #}
+{# Usage: {{ macros.stat_item(count, label) }}   #}
+{# --------------------------------------------- #}
+{% macro stat_item(count, label, icon) %}
+    <div class="skn-stat-item">
+        {% if icon %}
+            <i class="la la-{{ icon }}"></i>
+        {% endif %}
+        <span class="skn-stat-count">{{ count|default(0) }}</span>
+        <span class="skn-stat-label">{{ label }}</span>
+    </div>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Message d'état vide inline             #}
+{# Usage: {{ macros.empty_inline(message) }}     #}
+{# --------------------------------------------- #}
+{% macro empty_inline(message, icon) %}
+    <div class="skn-empty-inline">
+        {% if icon %}<i class="la la-{{ icon }}"></i> {% endif %}
+        <span>{{ message }}</span>
+    </div>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Loading spinner                        #}
+{# Usage: {{ macros.loader(text) }}              #}
+{# --------------------------------------------- #}
+{% macro loader(text) %}
+    <div class="skn-loader">
+        <div class="skn-loader-spinner"></div>
+        {% if text %}<span>{{ text }}</span>{% endif %}
+    </div>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Tag de connaissance                    #}
+{# Usage: {{ macros.tag(slug, name) }}           #}
+{# --------------------------------------------- #}
+{% macro tag(slug, name, removable) %}
+    <span class="skn-tag">
+        <a href="/tag/{{ slug }}">#{{ name|default(slug) }}</a>
+        {% if removable %}
+            <button type="button" class="skn-tag-remove" data-tag="{{ slug }}">
+                <i class="la la-times"></i>
+            </button>
+        {% endif %}
+    </span>
+{% endmacro %}
+
+{# --------------------------------------------- #}
+{# MACRO: Liste de tags                          #}
+{# Usage: {{ macros.tag_list(tags) }}            #}
+{# --------------------------------------------- #}
+{% macro tag_list(tags, limit) %}
+    {% import _self as self %}
+    {% set max = limit|default(5) %}
+    <div class="skn-tag-list">
+        {% for tag in tags|slice(0, max) %}
+            {{ self.tag(tag.slug|default(tag), tag.name|default(tag)) }}
+        {% endfor %}
+        {% if tags|length > max %}
+            <span class="skn-tag-more">+{{ tags|length - max }}</span>
+        {% endif %}
+    </div>
+{% endmacro %}

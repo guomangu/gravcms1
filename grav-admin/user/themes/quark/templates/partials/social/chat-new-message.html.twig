@@ -1,0 +1,44 @@
+{# ============================================= #}
+{# PARTIAL: Nouveau message direct               #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - current_user: username courant
+{#   - accounts: collection des comptes
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<div class="skn-chat-header">
+    <div class="skn-chat-header-avatar">
+        <i class="la la-user-plus"></i>
+    </div>
+    <div class="skn-chat-header-info">
+        <h3>Nouveau message</h3>
+        <span class="skn-chat-header-status">Sélectionnez un destinataire</span>
+    </div>
+</div>
+
+<div class="skn-chat-new-message">
+    <form action="/messages" method="get" class="skn-new-dm-form">
+        <input type="hidden" name="type" value="direct" />
+        <div class="skn-form-group">
+            <label for="recipient">Destinataire</label>
+            <select name="channel" id="recipient" class="skn-input" required>
+                <option value="">Sélectionnez un utilisateur...</option>
+                {% if accounts %}
+                    {% for user in accounts %}
+                        {% if user.username != current_user %}
+                            <option value="{{ user.username }}">
+                                {{ user.fullname|default(user.username) }} (@{{ user.username }})
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+        <button type="submit" class="skn-btn skn-btn-primary">
+            <i class="la la-arrow-right"></i> Démarrer la conversation
+        </button>
+    </form>
+</div>

@@ -1,0 +1,41 @@
+{# ============================================= #}
+{# ATOM: Carte de Room                         #}
+{# ============================================= #}
+{# Variables requises: room                     #}
+{% set room_name = room.name|default('Sans nom') %}
+{% set room_slug = room.slug|default(room.key|default('')) %}
+{% set room_desc = room.description|default('')|striptags|slice(0, 100) %}
+{% set room_admins = room.admins|default([]) %}
+{% set room_members_list = room.members|default([]) %}
+{# Compter les membres uniques #}
+{% set member_count = room_admins|length %}
+{% for m in room_members_list if m not in room_admins %}{% set member_count = member_count + 1 %}{% endfor %}
+{% set room_location = room.location|default(null) %}
+{% set user_is_member = current_user in room_members_list or current_user in room_admins %}
+
+<a href="/room/{{ room_slug }}" class="skn-room-card{% if user_is_member %} skn-room-card--member{% endif %}">
+    <div class="skn-room-card__avatar">
+        {{ room_name|first|upper }}
+    </div>
+    <div class="skn-room-card__content">
+        <h3 class="skn-room-card__name">{{ room_name }}</h3>
+        {% if room_desc %}
+            <p class="skn-room-card__desc">{{ room_desc }}{% if room_desc|length >= 100 %}...{% endif %}</p>
+        {% endif %}
+        <div class="skn-room-card__meta">
+            <span class="skn-room-card__members">
+                <i class="la la-users"></i> {{ member_count }}
+            </span>
+            {% if room_location %}
+                <span class="skn-room-card__location">
+                    <i class="la la-map-marker"></i> {{ room_location }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+    {% if user_is_member %}
+        <span class="skn-room-card__status">
+            <i class="la la-check-circle"></i>
+        </span>
+    {% endif %}
+</a>

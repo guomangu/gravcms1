@@ -1,0 +1,77 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+<div class="skn-home">
+    {# Hero - Action principale #}
+    <section class="skn-hero">
+        <div class="skn-hero__content">
+            {% include 'partials/atoms/logo.html.twig' with {size: 'lg'} %}
+            <h1 class="skn-hero__title">Social Knowledge Network</h1>
+            <p class="skn-hero__subtitle">Rejoignez des rooms thématiques et partagez vos connaissances</p>
+            
+            {% if is_logged_in %}
+                <div class="skn-hero__actions">
+                    <a href="/create-room" class="skn-btn skn-btn--primary skn-btn--lg">
+                        <i class="la la-plus"></i> Créer une room
+                    </a>
+                    <a href="/mesrooms" class="skn-btn skn-btn--outline skn-btn--lg">
+                        <i class="la la-layer-group"></i> Mes rooms
+                    </a>
+                </div>
+            {% else %}
+                <div class="skn-hero__actions">
+                    <a href="/register" class="skn-btn skn-btn--primary skn-btn--lg">
+                        <i class="la la-user-plus"></i> Rejoindre
+                    </a>
+                    <a href="/login" class="skn-btn skn-btn--outline skn-btn--lg">
+                        <i class="la la-sign-in-alt"></i> Connexion
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {# Liste des rooms #}
+    <section class="skn-section">
+        <header class="skn-section__header">
+            <h2><i class="la la-fire"></i> Rooms actives</h2>
+            <a href="/explore" class="skn-link">Voir tout <i class="la la-arrow-right"></i></a>
+        </header>
+
+        {% if rooms_count > 0 %}
+            <div class="skn-card-grid">
+                {% for room in rooms|slice(0, 6) %}
+                    {% include 'partials/atoms/room-card.html.twig' with {room: room} %}
+                {% endfor %}
+            </div>
+        {% else %}
+            {% include 'partials/atoms/empty-state.html.twig' with {
+                icon: 'la-comments',
+                title: 'Aucune room pour le moment',
+                message: 'Soyez le premier à créer une room !',
+                action_url: is_logged_in ? '/create-room' : '/register',
+                action_label: is_logged_in ? 'Créer une room' : 'Rejoindre'
+            } %}
+        {% endif %}
+    </section>
+
+    {# Stats rapides #}
+    <section class="skn-stats-bar">
+        <div class="skn-stat">
+            <span class="skn-stat__value">{{ rooms_count }}</span>
+            <span class="skn-stat__label">Rooms</span>
+        </div>
+        <div class="skn-stat">
+            <span class="skn-stat__value">{{ users_count }}</span>
+            <span class="skn-stat__label">Membres</span>
+        </div>
+        <div class="skn-stat">
+            <span class="skn-stat__value">{{ activities|length }}</span>
+            <span class="skn-stat__label">Activités</span>
+        </div>
+    </section>
+</div>
+{% endblock %}

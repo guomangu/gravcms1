@@ -1,0 +1,80 @@
+{# ============================================= #}
+{# PARTIAL: Chat d'espace                        #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - space: objet espace
+{#   - messages_dir: directory des messages Flex
+{#   - accounts: collection des comptes
+{#   - current_user: username courant
+{#   - is_member: bool
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<section class="skn-card skn-card-lg">
+    <div class="skn-card-header-row">
+        <h2 class="skn-card-title"><i class="la la-comments"></i> Discussion</h2>
+        {{ macros.btn('/messages?type=space&channel=' ~ space.slug, 'Voir tout', 'expand', 'outline', 'sm') }}
+    </div>
+    
+    {# Chargement des messages de l'espace #}
+    {% set space_messages = [] %}
+    {% if messages_dir %}
+        {% for msg in messages_dir.collection %}
+            {% if msg.channel_type == 'space' and msg.channel_id == space.slug %}
+                {% set space_messages = space_messages|merge([msg]) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    
+    <div class="skn-space-chat-preview">
+        {% if space_messages|length > 0 %}
+            {% for msg in space_messages|slice(-5) %}
+                {% set sender = accounts ? accounts.load(msg.sender) : null %}
+                {% set sender_name = sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender %}
+                
+                <div class="skn-chat-preview-item">
+                    <div class="skn-chat-preview-avatar">
+                        {{ sender_name|first|upper }}
+                    </div>
+                    <div class="skn-chat-preview-content">
+                        <span class="skn-chat-preview-sender">{{ sender_name }}</span>
+                        <span class="skn-chat-preview-text">{{ msg.content|truncate(80) }}</span>
+                    </div>
+                    {{ macros.time_ago(msg.timestamp|slice(-8, 5)) }}
+                </div>
+            {% endfor %}
+        {% else %}
+            {% include 'partials/social/empty-state.html.twig' with {
+                icon: 'comments',
+                message: 'Aucun message dans cet espace.',
+                variant: 'inline'
+            } only %}
+        {% endif %}
+    </div>
+
+    {# Zone de saisie rapide #}
+    {% if is_member and current_user %}
+        <div class="skn-space-chat-input">
+            <form method="post" action="/send-message" class="skn-quick-message-form">
+                <input type="hidden" name="channel_type" value="space" />
+                <input type="hidden" name="channel_id" value="{{ space.slug }}" />
+                {{ nonce_field('send-message', 'message-nonce')|raw }}
+                
+                <input type="text" 
+                       name="content" 
+                       class="skn-input" 
+                       placeholder="Écrire un message..." 
+                       required />
+                <button type="submit" class="skn-btn skn-btn-primary">
+                    <i class="la la-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    {% elseif not is_member %}
+        <p class="skn-muted skn-text-center skn-p-md">
+            <i class="la la-lock"></i> Rejoignez l'espace pour participer à la discussion.
+        </p>
+    {% endif %}
+</section>

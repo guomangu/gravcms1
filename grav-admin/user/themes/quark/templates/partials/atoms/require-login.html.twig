@@ -1,0 +1,20 @@
+{# ============================================= #}
+{# ATOM: Bloc demandant connexion              #}
+{# ============================================= #}
+{% set message = message|default('Vous devez être connecté') %}
+{% set redirect = redirect|default(uri.path) %}
+
+<div class="skn-require-login">
+    <div class="skn-require-login__icon">
+        <i class="la la-lock"></i>
+    </div>
+    <p class="skn-require-login__message">{{ message }}</p>
+    <div class="skn-require-login__actions">
+        <a href="/login?redirect={{ redirect|url_encode }}" class="skn-btn skn-btn--primary">
+            <i class="la la-sign-in-alt"></i> Se connecter
+        </a>
+        <a href="/register" class="skn-btn skn-btn--outline">
+            <i class="la la-user-plus"></i> Créer un compte
+        </a>
+    </div>
+</div>

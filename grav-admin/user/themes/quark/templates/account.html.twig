@@ -1,0 +1,185 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{% set action = uri.query('action')|default('register') %}
+
+<div class="skn-account-page">
+    <div class="skn-account__container">
+        {# Card principale #}
+        <div class="skn-account__card">
+            {# Logo #}
+            <div class="skn-account__logo">
+                <span class="skn-gradient-text">SKN</span>
+            </div>
+
+            {# Tabs Login/Register #}
+            <div class="skn-tabs skn-tabs--account">
+                <button class="skn-tab{% if action == 'login' %} skn-tab--active{% endif %}" 
+                        onclick="showTab('login')">
+                    <i class="la la-sign-in-alt"></i> Connexion
+                </button>
+                <button class="skn-tab{% if action != 'login' %} skn-tab--active{% endif %}" 
+                        onclick="showTab('register')">
+                    <i class="la la-user-plus"></i> Inscription
+                </button>
+            </div>
+
+            {% include 'partials/messages.html.twig' %}
+
+            {# Formulaire de connexion #}
+            <div id="tab-login" class="skn-tab-content{% if action == 'login' %} skn-tab-content--active{% endif %}">
+                <form method="post" action="{{ page.url }}" class="skn-form">
+                    <input type="hidden" name="task" value="login.login" />
+                    {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+
+                    <div class="skn-form__group">
+                        <label for="login-username">
+                            <i class="la la-user"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text" 
+                               id="login-username" 
+                               name="username" 
+                               class="skn-input"
+                               placeholder="Votre nom d'utilisateur"
+                               required
+                               autocomplete="username" />
+                    </div>
+
+                    <div class="skn-form__group">
+                        <label for="login-password">
+                            <i class="la la-lock"></i> Mot de passe
+                        </label>
+                        <input type="password" 
+                               id="login-password" 
+                               name="password" 
+                               class="skn-input"
+                               placeholder="Votre mot de passe"
+                               required
+                               autocomplete="current-password" />
+                    </div>
+
+                    <div class="skn-form__row">
+                        <label class="skn-checkbox">
+                            <input type="checkbox" name="rememberme" value="1" />
+                            <span></span>
+                            Se souvenir de moi
+                        </label>
+                        <a href="/forgot" class="skn-link--subtle">Mot de passe oublié ?</a>
+                    </div>
+
+                    <button type="submit" class="skn-btn skn-btn--primary skn-btn--block">
+                        <i class="la la-sign-in-alt"></i> Se connecter
+                    </button>
+                </form>
+            </div>
+
+            {# Formulaire d'inscription #}
+            <div id="tab-register" class="skn-tab-content{% if action != 'login' %} skn-tab-content--active{% endif %}">
+                <form method="post" action="{{ page.url }}" class="skn-form">
+                    <input type="hidden" name="task" value="login.register" />
+                    {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+
+                    <div class="skn-form__row skn-form__row--2col">
+                        <div class="skn-form__group">
+                            <label for="reg-fullname">
+                                <i class="la la-id-card"></i> Nom complet
+                            </label>
+                            <input type="text" 
+                                   id="reg-fullname" 
+                                   name="data[fullname]" 
+                                   class="skn-input"
+                                   placeholder="Jean Dupont"
+                                   required />
+                        </div>
+
+                        <div class="skn-form__group">
+                            <label for="reg-username">
+                                <i class="la la-at"></i> Pseudo
+                            </label>
+                            <input type="text" 
+                                   id="reg-username" 
+                                   name="data[username]" 
+                                   class="skn-input"
+                                   placeholder="jean.dupont"
+                                   required
+                                   pattern="[a-z0-9_\-\.]+" />
+                        </div>
+                    </div>
+
+                    <div class="skn-form__group">
+                        <label for="reg-email">
+                            <i class="la la-envelope"></i> Email
+                        </label>
+                        <input type="email" 
+                               id="reg-email" 
+                               name="data[email]" 
+                               class="skn-input"
+                               placeholder="jean@example.com"
+                               required />
+                    </div>
+
+                    <div class="skn-form__row skn-form__row--2col">
+                        <div class="skn-form__group">
+                            <label for="reg-password1">
+                                <i class="la la-lock"></i> Mot de passe
+                            </label>
+                            <input type="password" 
+                                   id="reg-password1" 
+                                   name="data[password1]" 
+                                   class="skn-input"
+                                   placeholder="••••••••"
+                                   required
+                                   minlength="8" />
+                        </div>
+
+                        <div class="skn-form__group">
+                            <label for="reg-password2">
+                                <i class="la la-lock"></i> Confirmer
+                            </label>
+                            <input type="password" 
+                                   id="reg-password2" 
+                                   name="data[password2]" 
+                                   class="skn-input"
+                                   placeholder="••••••••"
+                                   required
+                                   minlength="8" />
+                        </div>
+                    </div>
+
+                    <div class="skn-form__group">
+                        <label class="skn-checkbox">
+                            <input type="checkbox" name="accept_terms" required />
+                            <span></span>
+                            J'accepte les <a href="#" class="skn-link">conditions d'utilisation</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="skn-btn skn-btn--primary skn-btn--block">
+                        <i class="la la-user-plus"></i> Créer mon compte
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# Décoration #}
+        <div class="skn-account__bg">
+            <div class="skn-account__pattern"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tab) {
+    document.querySelectorAll('.skn-tab').forEach(t => t.classList.remove('skn-tab--active'));
+    document.querySelectorAll('.skn-tab-content').forEach(c => c.classList.remove('skn-tab-content--active'));
+    
+    document.querySelector('[onclick="showTab(\'' + tab + '\')"]').classList.add('skn-tab--active');
+    document.getElementById('tab-' + tab).classList.add('skn-tab-content--active');
+    
+    history.replaceState(null, '', '/account?action=' + tab);
+}
+</script>
+{% endblock %}

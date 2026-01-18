@@ -1,0 +1,9 @@
+# Grav Core & Dependencies
+cache/
+logs/
+images/
+system/
+vendor/
+backup/
+tmp/
+.git/

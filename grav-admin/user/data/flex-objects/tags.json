@@ -1,0 +1,17 @@
+{
+    "intelligence-artificielle": {
+        "name": "Intelligence Artificielle",
+        "slug": "intelligence-artificielle",
+        "description": "IA, Machine Learning, Deep Learning"
+    },
+    "javascript": {
+        "name": "JavaScript",
+        "slug": "javascript",
+        "description": "Langage de programmation web"
+    },
+    "php": {
+        "name": "PHP",
+        "slug": "php",
+        "description": "Langage de programmation serveur"
+    }
+}

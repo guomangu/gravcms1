@@ -1,0 +1,252 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{% if not is_logged_in %}
+    {% include 'partials/skn/require-auth.html.twig' with {
+        message: 'Connectez-vous pour accéder à vos messages',
+        redirect: '/messages'
+    } only %}
+{% else %}
+    {% set grav_user = grav.user %}
+    {% set channel_type = uri.query('type')|default('global') %}
+    {% set channel_id = uri.query('channel')|default('general') %}
+
+    <div class="skn-messages-page">
+        <div class="skn-messages__container">
+            {# Sidebar - Liste des conversations #}
+            <aside class="skn-messages__sidebar">
+                <div class="skn-messages__sidebar-header">
+                    <h2><i class="la la-comments"></i> Messages</h2>
+                    <a href="/messages?type=direct&channel=new" class="skn-btn skn-btn--outline skn-btn--sm">
+                        <i class="la la-plus"></i>
+                    </a>
+                </div>
+                
+                <nav class="skn-messages__nav">
+                    {# Chat Global #}
+                    <a href="/messages?type=global&channel=general" 
+                       class="skn-messages__item{% if channel_type == 'global' %} skn-messages__item--active{% endif %}">
+                        <span class="skn-messages__item-avatar skn-messages__item-avatar--global">
+                            <i class="la la-globe"></i>
+                        </span>
+                        <span class="skn-messages__item-info">
+                            <span class="skn-messages__item-name">Chat Global</span>
+                            <span class="skn-messages__item-preview">Ouvert à tous</span>
+                        </span>
+                    </a>
+                    
+                    {# Rooms de l'utilisateur #}
+                    {% set user_rooms = grav_user.relations.spaces|default([]) %}
+                    {% if user_rooms|length > 0 %}
+                        <div class="skn-messages__section">Mes Rooms</div>
+                        {% for room_slug in user_rooms %}
+                            {% set room = rooms[room_slug] is defined ? rooms[room_slug] : null %}
+                            {% if room %}
+                                <a href="/messages?type=space&channel={{ room_slug }}" 
+                                   class="skn-messages__item{% if channel_type == 'space' and channel_id == room_slug %} skn-messages__item--active{% endif %}">
+                                    <span class="skn-messages__item-avatar">
+                                        {{ room.name|default('?')|first|upper }}
+                                    </span>
+                                    <span class="skn-messages__item-info">
+                                        <span class="skn-messages__item-name">{{ room.name }}</span>
+                                        <span class="skn-messages__item-preview">{{ room.members|default([])|length }} membres</span>
+                                    </span>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {# Messages privés #}
+                    <div class="skn-messages__section">Messages Privés</div>
+                    {% set dm_users = [] %}
+                    {% for msg in messages %}
+                        {% if msg.channel_type == 'direct' %}
+                            {% if msg.sender == current_user %}
+                                {% set other = msg.channel_id %}
+                            {% elseif msg.channel_id == current_user %}
+                                {% set other = msg.sender %}
+                            {% else %}
+                                {% set other = null %}
+                            {% endif %}
+                            {% if other and other not in dm_users %}
+                                {% set dm_users = dm_users|merge([other]) %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if dm_users|length > 0 %}
+                        {% for dm_user in dm_users %}
+                            {% set user_obj = accounts ? accounts.load(dm_user) : null %}
+                            <a href="/messages?type=direct&channel={{ dm_user }}" 
+                               class="skn-messages__item{% if channel_type == 'direct' and channel_id == dm_user %} skn-messages__item--active{% endif %}">
+                                <span class="skn-messages__item-avatar">
+                                    {{ (user_obj and user_obj.exists ? user_obj.fullname|default(dm_user) : dm_user)|first|upper }}
+                                </span>
+                                <span class="skn-messages__item-info">
+                                    <span class="skn-messages__item-name">
+                                        {{ user_obj and user_obj.exists ? user_obj.fullname|default(dm_user) : dm_user }}
+                                    </span>
+                                    <span class="skn-messages__item-preview">@{{ dm_user }}</span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="skn-messages__empty-hint">Aucune conversation</p>
+                    {% endif %}
+                </nav>
+            </aside>
+            
+            {# Zone principale #}
+            <main class="skn-messages__main">
+                {% if channel_id == 'new' %}
+                    {# Nouveau message #}
+                    <div class="skn-messages__header">
+                        <h3><i class="la la-user-plus"></i> Nouveau message</h3>
+                    </div>
+                    <div class="skn-messages__new">
+                        <form action="/messages" method="get" class="skn-form">
+                            <input type="hidden" name="type" value="direct" />
+                            <div class="skn-form__group">
+                                <label>Destinataire</label>
+                                <select name="channel" class="skn-input" required>
+                                    <option value="">Sélectionnez...</option>
+                                    {% if accounts %}
+                                        {% for user in accounts %}
+                                            {% if user.username != current_user %}
+                                                <option value="{{ user.username }}">
+                                                    {{ user.fullname|default(user.username) }}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <button type="submit" class="skn-btn skn-btn--primary">
+                                Démarrer <i class="la la-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    {# Chat #}
+                    <div class="skn-messages__header">
+                        {% if channel_type == 'global' %}
+                            <span class="skn-messages__header-avatar skn-messages__header-avatar--global">
+                                <i class="la la-globe"></i>
+                            </span>
+                            <div class="skn-messages__header-info">
+                                <h3>Chat Global</h3>
+                                <span>Discussion ouverte à tous</span>
+                            </div>
+                        {% elseif channel_type == 'space' %}
+                            {% set room = rooms[channel_id] is defined ? rooms[channel_id] : null %}
+                            <span class="skn-messages__header-avatar">
+                                {{ (room ? room.name : channel_id)|first|upper }}
+                            </span>
+                            <div class="skn-messages__header-info">
+                                <h3>{{ room ? room.name : channel_id }}</h3>
+                                <span>{{ room ? room.members|default([])|length : 0 }} membres</span>
+                            </div>
+                            <a href="/room/{{ channel_id }}" class="skn-btn skn-btn--outline skn-btn--sm">
+                                <i class="la la-external-link-alt"></i> Voir
+                            </a>
+                        {% elseif channel_type == 'direct' %}
+                            {% set other_user = accounts ? accounts.load(channel_id) : null %}
+                            <span class="skn-messages__header-avatar">
+                                {{ (other_user and other_user.exists ? other_user.fullname|default(channel_id) : channel_id)|first|upper }}
+                            </span>
+                            <div class="skn-messages__header-info">
+                                <h3>{{ other_user and other_user.exists ? other_user.fullname|default(channel_id) : channel_id }}</h3>
+                                <span>@{{ channel_id }}</span>
+                            </div>
+                            <a href="/u/{{ channel_id }}" class="skn-btn skn-btn--outline skn-btn--sm">
+                                <i class="la la-user"></i> Profil
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    {# Messages #}
+                    <div class="skn-messages__chat" id="chat-messages">
+                        {% set channel_messages = [] %}
+                        {% for msg in messages %}
+                            {% if channel_type == 'global' and msg.channel_type == 'global' %}
+                                {% set channel_messages = channel_messages|merge([msg]) %}
+                            {% elseif channel_type == 'space' and msg.channel_type == 'space' and msg.channel_id == channel_id %}
+                                {% set channel_messages = channel_messages|merge([msg]) %}
+                            {% elseif channel_type == 'direct' and msg.channel_type == 'direct' %}
+                                {% if (msg.sender == current_user and msg.channel_id == channel_id) or 
+                                      (msg.sender == channel_id and msg.channel_id == current_user) %}
+                                    {% set channel_messages = channel_messages|merge([msg]) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if channel_messages|length > 0 %}
+                            {% for msg in channel_messages %}
+                                {% set is_own = msg.sender == current_user %}
+                                {% set sender_user = accounts ? accounts.load(msg.sender) : null %}
+                                {% set sender_name = sender_user and sender_user.exists ? sender_user.fullname|default(msg.sender) : msg.sender %}
+                                
+                                <div class="skn-message{% if is_own %} skn-message--own{% endif %}">
+                                    {% if not is_own %}
+                                        <a href="/u/{{ msg.sender }}" class="skn-message__avatar">
+                                            {{ sender_name|first|upper }}
+                                        </a>
+                                    {% endif %}
+                                    <div class="skn-message__content">
+                                        {% if not is_own and channel_type != 'direct' %}
+                                            <span class="skn-message__sender">{{ sender_name }}</span>
+                                        {% endif %}
+                                        <div class="skn-message__bubble">{{ msg.content|nl2br }}</div>
+                                        <span class="skn-message__time">{{ msg.timestamp|default('--')|slice(-8, 5) }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="skn-messages__empty">
+                                <i class="la la-comments"></i>
+                                <p>Aucun message</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    {# Zone de saisie #}
+                    <form method="post" action="/send-message" class="skn-messages__input">
+                        <input type="hidden" name="channel_type" value="{{ channel_type }}" />
+                        <input type="hidden" name="channel_id" value="{{ channel_id }}" />
+                        {{ nonce_field('send-message', 'message-nonce')|raw }}
+                        
+                        <textarea name="content" 
+                                  placeholder="Écrire un message..." 
+                                  class="skn-input"
+                                  rows="1"
+                                  required></textarea>
+                        <button type="submit" class="skn-btn skn-btn--primary">
+                            <i class="la la-paper-plane"></i>
+                        </button>
+                    </form>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chat = document.getElementById('chat-messages');
+        if (chat) chat.scrollTop = chat.scrollHeight;
+        
+        const textarea = document.querySelector('.skn-messages__input textarea');
+        if (textarea) {
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.form.submit();
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
+{% endblock %}

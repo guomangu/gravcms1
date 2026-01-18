@@ -1,0 +1,103 @@
+{# ============================================= #}
+{# PARTIAL: Sidebar de chat                      #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - current_user: username courant
+{#   - grav_user: objet utilisateur Grav
+{#   - space_dir: directory des espaces
+{#   - accounts: collection des comptes
+{#   - messages_all: tous les messages
+{#   - channel_type: type de canal actif
+{#   - channel_id: id du canal actif
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<aside class="skn-chat-sidebar">
+    <div class="skn-chat-sidebar-header">
+        <h2><i class="la la-comments"></i> Conversations</h2>
+        {{ macros.btn('/messages?type=direct&channel=new', '', 'plus', 'outline', 'sm') }}
+    </div>
+    
+    <div class="skn-chat-list">
+        {# Chat Global #}
+        <a href="/messages?type=global&channel=general" 
+           class="skn-chat-item {{ channel_type == 'global' and channel_id == 'general' ? 'active' : '' }}">
+            <div class="skn-chat-item-avatar skn-chat-space">
+                <i class="la la-globe"></i>
+            </div>
+            <div class="skn-chat-item-info">
+                <div class="skn-chat-item-name">Chat Global</div>
+                <div class="skn-chat-item-preview">Discussion ouverte à tous</div>
+            </div>
+        </a>
+        
+        {# Espaces de l'utilisateur #}
+        {% set user_spaces = grav_user.relations.spaces|default([]) %}
+        {% if user_spaces|length > 0 %}
+            <div class="skn-chat-section-title">
+                <span>Espaces</span>
+            </div>
+            {% for space_slug in user_spaces %}
+                {% set space = space_dir ? space_dir.getObject(space_slug) : null %}
+                {% if space %}
+                    <a href="/messages?type=space&channel={{ space.slug }}" 
+                       class="skn-chat-item {{ channel_type == 'space' and channel_id == space.slug ? 'active' : '' }}">
+                        <div class="skn-chat-item-avatar skn-chat-space">
+                            {{ space.name|default('?')|first|upper }}
+                        </div>
+                        <div class="skn-chat-item-info">
+                            <div class="skn-chat-item-name">{{ space.name }}</div>
+                            <div class="skn-chat-item-preview">{{ space.members|default([])|length }} membres</div>
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        {# Messages privés #}
+        <div class="skn-chat-section-title">
+            <span>Messages privés</span>
+        </div>
+        
+        {# Liste des conversations DM #}
+        {% set dm_users = [] %}
+        {% for msg in messages_all %}
+            {% if msg.channel_type == 'direct' %}
+                {% if msg.sender == current_user %}
+                    {% set other = msg.channel_id %}
+                {% elseif msg.channel_id == current_user %}
+                    {% set other = msg.sender %}
+                {% else %}
+                    {% set other = null %}
+                {% endif %}
+                {% if other and other not in dm_users %}
+                    {% set dm_users = dm_users|merge([other]) %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        
+        {% for dm_user in dm_users %}
+            {% set user_obj = accounts ? accounts.load(dm_user) : null %}
+            {% if user_obj and user_obj.exists %}
+                <a href="/messages?type=direct&channel={{ dm_user }}" 
+                   class="skn-chat-item {{ channel_type == 'direct' and channel_id == dm_user ? 'active' : '' }}">
+                    <div class="skn-chat-item-avatar">
+                        {{ user_obj.fullname|default(dm_user)|first|upper }}
+                    </div>
+                    <div class="skn-chat-item-info">
+                        <div class="skn-chat-item-name">{{ user_obj.fullname|default(dm_user) }}</div>
+                        <div class="skn-chat-item-preview">@{{ dm_user }}</div>
+                    </div>
+                </a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if dm_users|length == 0 %}
+            <div class="skn-chat-empty-hint">
+                <p>Aucune conversation privée</p>
+            </div>
+        {% endif %}
+    </div>
+</aside>

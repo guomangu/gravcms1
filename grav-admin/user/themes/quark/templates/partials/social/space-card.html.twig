@@ -1,0 +1,65 @@
+{# ============================================= #}
+{# PARTIAL: Carte d'espace réutilisable          #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - space: objet espace Flex
+{#   - current_user: nom d'utilisateur courant (optionnel)
+{#   - variant: 'default' | 'compact' | 'featured' (optionnel)
+{#   - show_actions: afficher les boutons d'action (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('default') %}
+{% set show_actions = show_actions|default(true) %}
+{% set slug = space.slug|default(space.key|default('')) %}
+{% set name = space.name|default('Sans nom') %}
+{% set description = space.description|default('Aucune description.') %}
+{% set access = space.access_level|default('public') %}
+{% set members = space.members|default([]) %}
+{% set member_count = members|length %}
+{% set is_member = current_user and (current_user in members) %}
+
+<article class="skn-space-card skn-space-card--{{ variant }}{% if is_member %} skn-space-card--member{% endif %}">
+    {# Header avec avatar et badge #}
+    <div class="skn-space-card__header">
+        <div class="skn-space-card__avatar">
+            {{ name|first|upper }}
+        </div>
+        {{ macros.badge(access, access) }}
+    </div>
+    
+    {# Titre #}
+    <h3 class="skn-space-card__title">
+        <a href="/s/{{ slug }}">{{ name }}</a>
+    </h3>
+    
+    {# Description (sauf variant compact) #}
+    {% if variant != 'compact' %}
+        <p class="skn-space-card__desc">
+            {{ description|striptags|truncate(variant == 'featured' ? 150 : 100) }}
+        </p>
+    {% endif %}
+    
+    {# Footer avec stats et actions #}
+    <div class="skn-space-card__footer">
+        <div class="skn-space-card__stats">
+            {{ macros.icon_label('users', member_count, member_count ~ ' membre(s)') }}
+        </div>
+        
+        {% if show_actions %}
+            <div class="skn-space-card__actions">
+                {% if is_member %}
+                    <span class="skn-status-badge skn-status-member">
+                        <i class="la la-check"></i> Membre
+                    </span>
+                {% elseif current_user %}
+                    {{ macros.btn('/s/' ~ slug, 'Découvrir', null, 'outline', 'sm') }}
+                {% else %}
+                    {{ macros.btn('/s/' ~ slug, 'Voir', null, 'outline', 'sm') }}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</article>

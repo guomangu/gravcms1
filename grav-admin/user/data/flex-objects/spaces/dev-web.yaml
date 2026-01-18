@@ -1,0 +1,16 @@
+name: Développement Web
+slug: dev-web
+description: |
+  Communauté de développeurs web partageant leurs connaissances sur les technologies front-end et back-end modernes.
+  
+  **Technologies couvertes :**
+  - JavaScript / TypeScript
+  - PHP / Python
+  - React, Vue, Svelte
+  - Node.js, Deno
+access_level: public
+admins:
+  - guillaume
+members:
+  - guillaume
+published: true

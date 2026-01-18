@@ -1,0 +1,18 @@
+state: enabled
+email: guang@gmail.com
+fullname: Guang
+title: Membre
+access:
+  site:
+    login: true
+hashed_password: $2y$12$XCnwykGoMafw.53.nrmYYu2AMdvENH5bhqBRyz5mDWhqP7B.x3aAG
+relations:
+  spaces:
+    - rooom
+    - roooom-boy
+    - ytreza
+    - dfghjk
+    - sdfghj
+    - hgfds
+    - wlallaw
+    - masuepdld

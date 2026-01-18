@@ -1,0 +1,78 @@
+{# ============================================= #}
+{# PARTIAL: Carte utilisateur réutilisable       #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - user: objet utilisateur
+{#   - current_user: nom d'utilisateur courant (optionnel)
+{#   - variant: 'default' | 'compact' | 'inline' (optionnel)
+{#   - show_actions: afficher les boutons d'action (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('default') %}
+{% set show_actions = show_actions|default(true) %}
+{% set username = user.username|default('') %}
+{% set fullname = user.fullname|default(username) %}
+{% set bio = user.bio|default('') %}
+{% set spaces_count = user.relations.spaces|default([])|length %}
+{% set is_self = current_user and (current_user == username) %}
+
+{% if variant == 'inline' %}
+    {# Variante inline pour listes compactes #}
+    <div class="skn-user-inline">
+        {{ macros.avatar(fullname, 'sm', '/u/' ~ username) }}
+        <div class="skn-user-inline__info">
+            {{ macros.user_link(username, fullname) }}
+            <span class="skn-user-inline__username">@{{ username }}</span>
+        </div>
+        {% if show_actions and not is_self %}
+            {{ macros.btn('/u/' ~ username, 'Voir', null, 'outline', 'xs') }}
+        {% endif %}
+    </div>
+{% else %}
+    {# Variante carte standard #}
+    <article class="skn-user-card skn-user-card--{{ variant }}{% if is_self %} skn-user-card--self{% endif %}">
+        {# Header avec avatar #}
+        <div class="skn-user-card__header">
+            <a href="/u/{{ username }}" class="skn-user-card__avatar">
+                {{ fullname|first|upper }}
+            </a>
+        </div>
+        
+        {# Nom et username #}
+        <h3 class="skn-user-card__name">
+            <a href="/u/{{ username }}">{{ fullname }}</a>
+        </h3>
+        <p class="skn-user-card__username">@{{ username }}</p>
+        
+        {# Bio (variante default uniquement) #}
+        {% if variant == 'default' and bio %}
+            <p class="skn-user-card__bio">
+                {{ bio|striptags|truncate(80) }}
+            </p>
+        {% endif %}
+        
+        {# Footer avec stats et actions #}
+        <div class="skn-user-card__footer">
+            <div class="skn-user-card__stats">
+                {{ macros.icon_label('layer-group', spaces_count, 'Espaces') }}
+            </div>
+            
+            {% if show_actions %}
+                <div class="skn-user-card__actions">
+                    {% if is_self %}
+                        <span class="skn-status-badge skn-status-you">
+                            <i class="la la-user"></i> Vous
+                        </span>
+                    {% elseif current_user %}
+                        {{ macros.btn('/u/' ~ username, 'Voir le profil', null, 'outline', 'sm') }}
+                    {% else %}
+                        {{ macros.btn('/u/' ~ username, 'Voir', null, 'outline', 'sm') }}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </article>
+{% endif %}

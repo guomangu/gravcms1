@@ -1,0 +1,48 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{# Chargement des données Flex #}
+{% set current_user = grav.user.username|default(null) %}
+{% set flex = grav.get('flex_objects') %}
+
+{% set activity_dir = flex ? flex.getDirectory('activity-stream') : null %}
+{% set activities = activity_dir ? activity_dir.collection : [] %}
+{% set activity_count = activities|length %}
+
+{% set space_dir = flex ? flex.getDirectory('social-spaces') : null %}
+{% set accounts = grav.accounts is defined ? grav.accounts : null %}
+
+<div class="skn-feed-page">
+    <header class="skn-page-header">
+        <h1><i class="la la-stream"></i> Flux d'Activité Global</h1>
+        <p class="skn-page-desc">Suivez en temps réel les dernières actions de la communauté.</p>
+    </header>
+    
+    {% if activity_count > 0 %}
+        <div class="skn-feed-timeline">
+            {% for activity in activities %}
+                {% include 'partials/social/feed-item.html.twig' with {
+                    activity: activity,
+                    accounts: accounts,
+                    space_dir: space_dir
+                } only %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {% include 'partials/social/empty-state.html.twig' with {
+            icon: 'inbox',
+            title: 'Aucune activité pour le moment',
+            message: "L'activité de la communauté apparaîtra ici au fur et à mesure.",
+            cta_url: '/explore',
+            cta_label: 'Explorer la communauté',
+            cta_icon: 'compass',
+            alt_url: current_user ? '/create-room' : null,
+            alt_label: 'Créer un espace',
+            current_user: current_user,
+            variant: 'large'
+        } only %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% set user = grav.user %}
+
+<div class="skn-auth-page">
+    <div class="skn-auth-card skn-auth-card--register">
+        {# Logo #}
+        {% include 'partials/atoms/logo.html.twig' %}
+        
+        {% if user.authenticated %}
+            {# Déjà connecté #}
+            <h1 class="skn-auth-title">Déjà connecté</h1>
+            <p class="skn-auth-subtitle">Vous êtes déjà connecté en tant que <strong>{{ user.username }}</strong></p>
+            
+            <div class="skn-auth-actions">
+                <a href="/" class="skn-btn skn-btn--primary skn-btn--block">
+                    <i class="la la-home"></i> Accueil
+                </a>
+            </div>
+        {% else %}
+            {# Formulaire d'inscription #}
+            <h1 class="skn-auth-title">Inscription</h1>
+            <p class="skn-auth-subtitle">Rejoignez la communauté</p>
+            
+            {# Messages flash système #}
+            {% include 'partials/atoms/flash-messages.html.twig' %}
+            
+            {# Zone pour les erreurs JS #}
+            <div id="register-errors" class="skn-register-errors"></div>
+            
+            <div class="skn-form-wrapper">
+                {% include 'forms/form.html.twig' %}
+            </div>
+            
+            {# Action secondaire #}
+            <div class="skn-auth-footer">
+                <p>Déjà inscrit ?</p>
+                <a href="/login" class="skn-link">Se connecter</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Le JS de validation est chargé via skn-auth.js #}
+{% endblock %}

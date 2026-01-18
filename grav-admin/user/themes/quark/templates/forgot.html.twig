@@ -1,0 +1,50 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+<div class="skn-auth-page">
+    <div class="skn-auth-card">
+        <div class="skn-auth-header">
+            <div class="skn-auth-logo">
+                <span class="skn-gradient-text">SKN</span>
+            </div>
+            <h1>Mot de passe oublié</h1>
+            <p>Entrez votre email pour recevoir un lien de réinitialisation.</p>
+        </div>
+
+        {% include 'partials/messages.html.twig' %}
+
+        <form method="post" action="{{ page.url }}" class="skn-auth-form">
+            <input type="hidden" name="task" value="login.forgot" />
+            {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+
+            <div class="skn-form-group">
+                <label for="email">
+                    <i class="la la-envelope"></i> Adresse email
+                </label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="skn-input"
+                       placeholder="Votre adresse email"
+                       required
+                       autocomplete="email"
+                       autofocus />
+            </div>
+
+            <button type="submit" class="skn-btn skn-btn-primary skn-btn-block">
+                <i class="la la-paper-plane"></i> Envoyer le lien
+            </button>
+        </form>
+
+        <div class="skn-auth-footer">
+            <a href="{{ base_url }}/login" class="skn-btn skn-btn-outline skn-btn-block">
+                <i class="la la-arrow-left"></i> Retour à la connexion
+            </a>
+        </div>
+    </div>
+
+    <div class="skn-auth-bg">
+        <div class="skn-auth-bg-pattern"></div>
+    </div>
+</div>
+{% endblock %}

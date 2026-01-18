@@ -1,0 +1,32 @@
+{# ============================================= #}
+{# PARTIAL: Statut de ma demande d'adhésion     #}
+{# ============================================= #}
+{# Params: request, total_members, room_slug #}
+
+{% set accepts = request.votes_accept|default([])|length %}
+{% set rejects = request.votes_reject|default([])|length %}
+{% set majority = ((total_members) / 2)|round(0, 'ceil') %}
+
+<section class="skn-section">
+    <div class="skn-request-status-card">
+        <div class="skn-request-status-card__icon">
+            <i class="la la-hourglass-half"></i>
+        </div>
+        <div class="skn-request-status-card__content">
+            <h3>Votre demande est en cours de vote</h3>
+            <div class="skn-vote-inline">
+                <span class="skn-text-success"><i class="la la-check"></i> {{ accepts }} pour</span>
+                <span class="skn-text-danger"><i class="la la-times"></i> {{ rejects }} contre</span>
+                <span class="skn-text-muted">/ {{ total_members }} membres (majorité: {{ majority }})</span>
+            </div>
+            <form method="post" action="/social-action" class="skn-inline-form skn-mt-1">
+                <input type="hidden" name="action" value="cancel-request">
+                <input type="hidden" name="target" value="{{ room_slug }}">
+                {{ nonce_field('social-action', 'social-nonce')|raw }}
+                <button type="submit" class="skn-btn skn-btn--sm skn-btn--ghost">
+                    <i class="la la-times"></i> Annuler ma demande
+                </button>
+            </form>
+        </div>
+    </div>
+</section>

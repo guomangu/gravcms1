@@ -1,0 +1,151 @@
+{
+    "demo-ia": {
+        "name": "Intelligence Artificielle",
+        "slug": "demo-ia",
+        "description": "Espace dédié à l'exploration et au partage de connaissances sur l'intelligence artificielle, le machine learning et le deep learning.\n\n**Sujets abordés :**\n- Réseaux de neurones\n- NLP et traitement du langage\n- Vision par ordinateur\n- IA générative",
+        "access_level": "public",
+        "admins": [
+            "guillaume"
+        ],
+        "members": [
+            "guillaume",
+            "guang"
+        ]
+    },
+    "dev-web": {
+        "name": "Développement Web",
+        "slug": "dev-web",
+        "description": "Communauté de développeurs web partageant leurs connaissances sur les technologies front-end et back-end modernes.\n\n**Technologies couvertes :**\n- JavaScript \/ TypeScript\n- PHP \/ Python\n- React, Vue, Svelte\n- Node.js, Deno",
+        "access_level": "public",
+        "admins": [
+            "guillaume"
+        ],
+        "members": [
+            "guillaume"
+        ]
+    },
+    "grav-cms": {
+        "name": "Maîtriser Grav CMS",
+        "slug": "grav-cms",
+        "description": "Groupe de travail pour approfondir les connaissances sur Grav CMS et son écosystème.\n\n**Contenu :**\n- Flex Objects avancés\n- Développement de plugins\n- Création de thèmes\n- Optimisation des performances",
+        "access_level": "public",
+        "admins": [
+            "guillaume"
+        ],
+        "members": [
+            "guillaume"
+        ]
+    },
+    "rooom": {
+        "name": "rooom",
+        "slug": "rooom",
+        "description": "rooom",
+        "access_level": "public",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "location": "",
+        "created": "2026-01-17 22:07:56"
+    },
+    "roooom-boy": {
+        "name": "roooom boy (Privé)",
+        "slug": "roooom-boy",
+        "description": "Room privée - demande d'adhésion avec vote obligatoire",
+        "access_level": "private",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "location": "",
+        "created": "2026-01-17 22:15:03"
+    },
+    "ytreza": {
+        "name": "ytreza",
+        "slug": "ytreza",
+        "description": "ytrez",
+        "access_level": "public",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "location": "",
+        "created": "2026-01-17 22:24:04"
+    },
+    "dfghjk": {
+        "name": "dfghjk",
+        "slug": "dfghjk",
+        "description": "sdfghjk",
+        "access_level": "public",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "location": "",
+        "created": "2026-01-17 22:27:26"
+    },
+    "sdfghj": {
+        "name": "sdfghj",
+        "description": "kiuytrdcvbg",
+        "slug": "sdfghj",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "",
+        "created": "2026-01-17 22:34:09"
+    },
+    "hgfds": {
+        "name": "hgfds",
+        "description": "hgfvbgf",
+        "slug": "hgfds",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "",
+        "created": "2026-01-17 22:40:25"
+    },
+    "wlallaw": {
+        "name": "wlallaw",
+        "description": "yaaaaa",
+        "slug": "wlallaw",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "",
+        "created": "2026-01-17 23:48:23"
+    },
+    "masuepdld": {
+        "name": "masuepdld",
+        "description": "aaaaaaaaaaaaaa",
+        "slug": "masuepdld",
+        "admins": [
+            "guang"
+        ],
+        "members": [
+            "guang"
+        ],
+        "access_level": "public",
+        "location": "",
+        "created": "2026-01-17 23:55:51"
+    }
+}

@@ -1,0 +1,166 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+{# Récupérer le slug de la room depuis l'URL #}
+{% set path_parts = uri.path|split('/') %}
+{% set room_slug = path_parts|last %}
+{% set room = rooms[room_slug]|default(null) %}
+
+<div class="skn-page-content">
+    {% include 'partials/atoms/flash-messages.html.twig' ignore missing %}
+    
+    {% if room %}
+        {# Variables de la room #}
+        {% set room_name = room.name|default('Sans nom') %}
+        {% set room_desc = room.description|default('') %}
+        {% set room_admins = room.admins|default([]) %}
+        {% set room_members = room.members|default([]) %}
+        {% set is_member = current_user in room_members or current_user in room_admins %}
+        {% set is_admin = current_user in room_admins %}
+        {# Compter les membres uniques (éviter doublons admin/membre) #}
+        {% set all_unique_members = [] %}
+        {% for u in room_admins %}{% set all_unique_members = all_unique_members|merge([u]) %}{% endfor %}
+        {% for u in room_members if u not in all_unique_members %}{% set all_unique_members = all_unique_members|merge([u]) %}{% endfor %}
+        {% set total_members = all_unique_members|length %}
+        
+        {# Demandes d'adhésion #}
+        {% set my_request_key = room_slug ~ '_' ~ current_user %}
+        {% set my_request = membership_requests[my_request_key]|default(null) %}
+        {% set has_pending_request = my_request and my_request.status == 'pending' %}
+        
+        {# Collecter les demandes en attente #}
+        {% set pending_requests = [] %}
+        {% for key, req in membership_requests if req.space_slug == room_slug and req.status == 'pending' %}
+            {% set pending_requests = pending_requests|merge([{key: key, data: req}]) %}
+        {% endfor %}
+
+        {# ========== HEADER ========== #}
+        <header class="skn-room-header">
+            <a href="/mesrooms" class="skn-back-link">
+                <i class="la la-arrow-left"></i> Retour
+            </a>
+            
+            <div class="skn-room-header__main">
+                <div class="skn-room-header__avatar">{{ room_name|first|upper }}</div>
+                <div class="skn-room-header__info">
+                    <h1>{{ room_name }}</h1>
+                    <span class="skn-room-header__meta">
+                        <i class="la la-users"></i> {{ total_members }} membre(s)
+                    </span>
+                </div>
+            </div>
+
+            {# Actions #}
+            <div class="skn-room-header__actions">
+                {% if not is_logged_in %}
+                    <a href="/login?redirect={{ uri.path|url_encode }}" class="skn-btn skn-btn--primary">
+                        <i class="la la-sign-in-alt"></i> Se connecter
+                    </a>
+                {% elseif is_admin %}
+                    <span class="skn-badge skn-badge--admin">Admin</span>
+                {% elseif is_member %}
+                    <span class="skn-badge skn-badge--success">Membre</span>
+                    <form method="post" action="/social-action" class="skn-inline-form">
+                        <input type="hidden" name="action" value="leave-space">
+                        <input type="hidden" name="target" value="{{ room_slug }}">
+                        {{ nonce_field('social-action', 'social-nonce')|raw }}
+                        <button type="submit" class="skn-btn skn-btn--sm skn-btn--ghost">
+                            <i class="la la-sign-out-alt"></i> Quitter
+                        </button>
+                    </form>
+                {% elseif has_pending_request %}
+                    <span class="skn-badge skn-badge--warning">
+                        <i class="la la-hourglass-half"></i> Demande en cours
+                    </span>
+                    <form method="post" action="/social-action" class="skn-inline-form">
+                        <input type="hidden" name="action" value="cancel-request">
+                        <input type="hidden" name="target" value="{{ room_slug }}">
+                        {{ nonce_field('social-action', 'social-nonce')|raw }}
+                        <button type="submit" class="skn-btn skn-btn--sm skn-btn--ghost" title="Annuler">
+                            <i class="la la-times"></i>
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="post" action="/social-action" class="skn-inline-form">
+                        <input type="hidden" name="action" value="request-join">
+                        <input type="hidden" name="target" value="{{ room_slug }}">
+                        {{ nonce_field('social-action', 'social-nonce')|raw }}
+                        <button type="submit" class="skn-btn skn-btn--primary">
+                            <i class="la la-user-plus"></i> Devenir membre
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </header>
+
+        {# ========== DESCRIPTION ========== #}
+        {% if room_desc %}
+            <section class="skn-room-description">
+                <p>{{ room_desc|nl2br }}</p>
+            </section>
+        {% endif %}
+
+        {# ========== VOTES EN COURS (membres uniquement) ========== #}
+        {% if is_member and pending_requests|length > 0 %}
+            {% include 'partials/skn/vote-panel.html.twig' with {
+                requests: pending_requests,
+                total_members: total_members,
+                current_user: current_user
+            } %}
+        {% endif %}
+
+        {# ========== MA DEMANDE EN COURS (non-membres) ========== #}
+        {% if not is_member and has_pending_request %}
+            {% include 'partials/skn/request-status.html.twig' with {
+                request: my_request,
+                total_members: total_members,
+                room_slug: room_slug
+            } %}
+        {% endif %}
+
+        {# ========== CHAT EXTERNE (PUBLIC) ========== #}
+        {% include 'partials/skn/chat-box.html.twig' with {
+            type: 'external',
+            title: 'Discussion publique',
+            icon: 'globe',
+            badge: 'Visible par tous',
+            room_slug: room_slug,
+            messages: messages,
+            can_write: is_logged_in,
+            is_logged_in: is_logged_in,
+            placeholder: 'Poser une question...'
+        } %}
+
+        {# ========== CHAT INTERNE (MEMBRES) ========== #}
+        {% include 'partials/skn/chat-box.html.twig' with {
+            type: 'internal',
+            title: 'Discussion interne',
+            icon: 'lock',
+            badge: 'Membres uniquement',
+            room_slug: room_slug,
+            messages: messages,
+            can_write: is_member,
+            can_view: is_member,
+            is_logged_in: is_logged_in,
+            placeholder: 'Message aux membres...',
+            locked_message: has_pending_request ? 'Votre demande est en cours de vote' : 'Devenez membre pour accéder'
+        } %}
+
+        {# ========== MEMBRES ========== #}
+        {% include 'partials/skn/members-list.html.twig' with {
+            admins: room_admins,
+            members: room_members
+        } %}
+
+    {% else %}
+        <div class="skn-empty-state">
+            <i class="la la-question-circle"></i>
+            <h2>Room introuvable</h2>
+            <p>Cette room n'existe pas.</p>
+            <a href="/explore" class="skn-btn skn-btn--primary">Explorer</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

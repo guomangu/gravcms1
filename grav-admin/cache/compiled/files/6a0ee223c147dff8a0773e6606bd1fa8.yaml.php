@@ -1,0 +1,15 @@
+<?php
+return [
+    '@class' => 'Grav\\Common\\File\\CompiledYamlFile',
+    'filename' => '/home/gu/g2/grav-admin/user/data/rememberme/2450ec3ccdf9492f0296810ab160876644aa9cff.yaml',
+    'modified' => 1768768648,
+    'size' => 194,
+    'data' => [
+        'f835bc7228b399bade1c12d5d7cc19ecc934155a' => [
+            '46bcfcdb3eb109bb03c0627ab8a296e344daf88b' => 1768768648
+        ],
+        'a743ad3da0e224160622c2751716d056f3d864bc' => [
+            '3359a8cde0b8a109fa988ac7acc0b695b8e93a3d' => 1768681947
+        ]
+    ]
+];

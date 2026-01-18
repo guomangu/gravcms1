@@ -1,0 +1,3 @@
+sudo chown -R gu:gu ./
+chmod +x frankenphp-linux-x86_64
+./frankenphp-linux-x86_64 php-server --listen :8080 -r .

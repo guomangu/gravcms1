@@ -1,0 +1,75 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+<div class="skn-auth-page">
+    <div class="skn-auth-card">
+        <div class="skn-auth-header">
+            <div class="skn-auth-logo">
+                <span class="skn-gradient-text">SKN</span>
+            </div>
+            <h1>Connexion</h1>
+            <p>Bienvenue ! Connectez-vous pour accéder à votre compte.</p>
+        </div>
+
+        {% include 'partials/messages.html.twig' %}
+
+        <form method="post" action="{{ page.url }}" class="skn-auth-form">
+            <input type="hidden" name="task" value="login.login" />
+            {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+
+            <div class="skn-form-group">
+                <label for="username">
+                    <i class="la la-user"></i> Nom d'utilisateur
+                </label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       class="skn-input"
+                       placeholder="Votre nom d'utilisateur"
+                       required
+                       autocomplete="username"
+                       autofocus />
+            </div>
+
+            <div class="skn-form-group">
+                <label for="password">
+                    <i class="la la-lock"></i> Mot de passe
+                </label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       class="skn-input"
+                       placeholder="Votre mot de passe"
+                       required
+                       autocomplete="current-password" />
+            </div>
+
+            <div class="skn-form-row">
+                <label class="skn-checkbox">
+                    <input type="checkbox" name="rememberme" value="1" />
+                    <span class="skn-checkmark"></span>
+                    Se souvenir de moi
+                </label>
+                <a href="{{ base_url }}/forgot-password" class="skn-link-subtle">
+                    Mot de passe oublié ?
+                </a>
+            </div>
+
+            <button type="submit" class="skn-btn skn-btn-primary skn-btn-block">
+                <i class="la la-sign-in-alt"></i> Se connecter
+            </button>
+        </form>
+
+        <div class="skn-auth-footer">
+            <p>Pas encore de compte ?</p>
+            <a href="{{ base_url }}/register" class="skn-btn skn-btn-outline skn-btn-block">
+                <i class="la la-user-plus"></i> Créer un compte
+            </a>
+        </div>
+    </div>
+
+    <div class="skn-auth-bg">
+        <div class="skn-auth-bg-pattern"></div>
+    </div>
+</div>
+{% endblock %}

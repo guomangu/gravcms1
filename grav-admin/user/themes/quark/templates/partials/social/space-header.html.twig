@@ -1,0 +1,62 @@
+{# ============================================= #}
+{# PARTIAL: Header d'espace                      #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - space: objet espace
+{#   - current_user: username courant (ou null)
+{#   - is_member: bool
+{#   - is_admin: bool
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+<header class="skn-space-header-full">
+    <div class="skn-space-header-bg"></div>
+    <div class="skn-space-header-content">
+        <div class="skn-space-avatar-large">
+            {{ space.name|default('?')|first|upper }}
+        </div>
+        <div class="skn-space-info">
+            <div class="skn-space-title-row">
+                <h1 class="skn-space-title">{{ space.name|default('Sans nom') }}</h1>
+                {{ macros.badge(space.access_level|default('public'), space.access_level|default('public')) }}
+            </div>
+            
+            {# Actions conditionnelles #}
+            <div class="skn-space-actions">
+                {% if current_user and not is_member %}
+                    {# Non membre - Bouton rejoindre #}
+                    <form method="post" action="/social-action" class="skn-inline-form">
+                        <input type="hidden" name="action" value="join-space">
+                        <input type="hidden" name="target" value="{{ space.slug }}">
+                        <button type="submit" class="skn-btn skn-btn-primary">
+                            <i class="la la-sign-in-alt"></i> Rejoindre l'espace
+                        </button>
+                    </form>
+                {% elseif is_member and not is_admin %}
+                    {# Membre simple #}
+                    <span class="skn-member-badge">
+                        <i class="la la-check-circle"></i> Membre
+                    </span>
+                    <form method="post" action="/social-action" class="skn-inline-form">
+                        <input type="hidden" name="action" value="leave-space">
+                        <input type="hidden" name="target" value="{{ space.slug }}">
+                        <button type="submit" class="skn-btn skn-btn-outline skn-btn-sm">
+                            <i class="la la-sign-out-alt"></i> Quitter
+                        </button>
+                    </form>
+                {% elseif is_admin %}
+                    {# Administrateur #}
+                    <span class="skn-admin-badge">
+                        <i class="la la-shield-alt"></i> Administrateur
+                    </span>
+                    {{ macros.btn('/admin/flex-objects/social-spaces/' ~ space.slug, 'Gérer', 'cog', 'outline', 'sm') }}
+                {% elseif not current_user %}
+                    {# Non connecté #}
+                    {{ macros.btn('/login', 'Connectez-vous pour rejoindre', 'sign-in-alt', 'outline') }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>

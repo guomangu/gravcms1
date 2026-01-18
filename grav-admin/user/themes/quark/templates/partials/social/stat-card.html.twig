@@ -1,0 +1,39 @@
+{# ============================================= #}
+{# PARTIAL: Carte de statistique                 #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - icon: icône Line Awesome (ex: 'users')
+{#   - value: valeur numérique
+{#   - label: libellé de la stat
+{#   - link: URL optionnelle
+{#   - variant: 'default' | 'compact' | 'large' (optionnel)
+{# --------------------------------------------- #}
+
+{% set variant = variant|default('default') %}
+{% set value = value|default(0) %}
+
+{% if link %}
+<a href="{{ link }}" class="skn-stat-card skn-stat-card--{{ variant }} skn-stat-card--clickable">
+{% else %}
+<div class="skn-stat-card skn-stat-card--{{ variant }}">
+{% endif %}
+
+    {% if icon %}
+        <div class="skn-stat-card__icon">
+            <i class="la la-{{ icon }}"></i>
+        </div>
+    {% endif %}
+    
+    <div class="skn-stat-card__content">
+        <span class="skn-stat-card__value">{{ value }}</span>
+        {% if label %}
+            <span class="skn-stat-card__label">{{ label }}</span>
+        {% endif %}
+    </div>
+
+{% if link %}
+</a>
+{% else %}
+</div>
+{% endif %}

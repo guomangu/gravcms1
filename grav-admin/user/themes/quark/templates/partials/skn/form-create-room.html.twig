@@ -1,0 +1,119 @@
+{# ============================================= #}
+{# PARTIAL: Formulaire création de Room          #}
+{# ============================================= #}
+{# 
+{# Variables:
+{#   - current_user: username courant (requis)
+{#   - redirect_url: URL après création (optionnel)
+{#   - compact: mode compact (optionnel)
+{# --------------------------------------------- #}
+
+{% set compact = compact|default(false) %}
+
+{% if current_user %}
+<div class="skn-form-card{% if compact %} skn-form-card--compact{% endif %}">
+    <div class="skn-form-card__header">
+        <h3><i class="la la-plus-circle"></i> Créer une Room</h3>
+    </div>
+    
+    <form method="post" action="/create-room-action" class="skn-form">
+        {{ nonce_field('create-room', 'room-nonce')|raw }}
+        <input type="hidden" name="creator" value="{{ current_user }}" />
+        
+        <div class="skn-form__group">
+            <label for="room-name">
+                <i class="la la-signature"></i> Nom de la room *
+            </label>
+            <input type="text" 
+                   id="room-name" 
+                   name="name" 
+                   class="skn-input"
+                   placeholder="Ma super room"
+                   required
+                   minlength="3"
+                   maxlength="50" />
+        </div>
+        
+        {% if not compact %}
+        <div class="skn-form__group">
+            <label for="room-slug">
+                <i class="la la-link"></i> Identifiant URL
+            </label>
+            <input type="text" 
+                   id="room-slug" 
+                   name="slug" 
+                   class="skn-input"
+                   placeholder="ma-super-room (auto-généré si vide)"
+                   pattern="[a-z0-9\-]+" />
+            <small>Lettres minuscules, chiffres et tirets uniquement</small>
+        </div>
+        
+        <div class="skn-form__group">
+            <label for="room-description">
+                <i class="la la-align-left"></i> Description
+            </label>
+            <textarea id="room-description" 
+                      name="description" 
+                      class="skn-input skn-textarea"
+                      placeholder="Décrivez votre room..."
+                      rows="3"></textarea>
+        </div>
+        
+        <div class="skn-form__group">
+            <label for="room-access">
+                <i class="la la-lock"></i> Accès
+            </label>
+            <select id="room-access" name="access_level" class="skn-input">
+                <option value="public">Public - Visible par tous</option>
+                <option value="private">Privé - Sur invitation uniquement</option>
+            </select>
+        </div>
+        
+        <div class="skn-form__group">
+            <label for="room-location">
+                <i class="la la-map-marker"></i> Localisation (optionnel)
+            </label>
+            <input type="text" 
+                   id="room-location" 
+                   name="location" 
+                   class="skn-input"
+                   placeholder="Paris, France" />
+            <input type="hidden" id="room-lat" name="latitude" />
+            <input type="hidden" id="room-lng" name="longitude" />
+            <button type="button" class="skn-btn skn-btn--outline skn-btn--sm" onclick="getGeolocation()">
+                <i class="la la-crosshairs"></i> Utiliser ma position
+            </button>
+        </div>
+        {% endif %}
+        
+        <div class="skn-form__actions">
+            <button type="submit" class="skn-btn skn-btn--primary">
+                <i class="la la-check"></i> Créer la room
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+function getGeolocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('room-lat').value = position.coords.latitude;
+            document.getElementById('room-lng').value = position.coords.longitude;
+            document.getElementById('room-location').value = 'Position actuelle';
+        }, function(error) {
+            alert('Impossible d\'obtenir la position: ' + error.message);
+        });
+    } else {
+        alert('Géolocalisation non supportée');
+    }
+}
+</script>
+{% else %}
+<div class="skn-form-card skn-form-card--locked">
+    <p><i class="la la-lock"></i> Connectez-vous pour créer une room</p>
+    <a href="/login" class="skn-btn skn-btn--primary">
+        <i class="la la-sign-in-alt"></i> Se connecter
+    </a>
+</div>
+{% endif %}

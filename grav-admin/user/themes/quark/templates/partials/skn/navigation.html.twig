@@ -1,0 +1,96 @@
+{# ============================================= #}
+{# PARTIAL: Navigation principale                #}
+{# ============================================= #}
+
+{% set grav_user = grav.user %}
+{% set current_user = grav_user.username|default(null) %}
+{% set user_authenticated = grav_user.authenticated|default(false) %}
+{% set is_logged_in = user_authenticated and current_user is not empty %}
+{% set current_path = uri.path %}
+
+<nav class="skn-nav">
+    <div class="skn-container skn-nav__container">
+        {# Logo #}
+        <a href="/" class="skn-nav__logo">
+            <span class="skn-gradient-text">SKN</span>
+        </a>
+
+        {# Menu principal #}
+        <ul class="skn-nav__menu">
+            <li>
+                <a href="/" class="{% if current_path == '/' %}skn-nav__link--active{% endif %}">
+                    <i class="la la-home"></i>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            <li>
+                <a href="/explore" class="{% if current_path starts with '/explore' %}skn-nav__link--active{% endif %}">
+                    <i class="la la-compass"></i>
+                    <span>Explorer</span>
+                </a>
+            </li>
+            {% if is_logged_in %}
+            <li>
+                <a href="/mesrooms" class="{% if current_path starts with '/mesrooms' %}skn-nav__link--active{% endif %}">
+                    <i class="la la-layer-group"></i>
+                    <span>Mes Rooms</span>
+                </a>
+            </li>
+            <li>
+                <a href="/messages" class="{% if current_path starts with '/messages' %}skn-nav__link--active{% endif %}">
+                    <i class="la la-comments"></i>
+                    <span>Messages</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+
+        {# Actions utilisateur #}
+        <div class="skn-nav__actions">
+            {% if is_logged_in %}
+                <a href="/create-room" class="skn-btn skn-btn--primary skn-btn--sm skn-nav__create">
+                    <i class="la la-plus"></i>
+                    <span>Créer</span>
+                </a>
+                <div class="skn-nav__user">
+                    <a href="/u/{{ current_user }}" class="skn-nav__avatar" title="{{ current_user }}">
+                        {{ grav.user.fullname|default(current_user)|first|upper }}
+                    </a>
+                    <div class="skn-nav__dropdown">
+                        <a href="/u/{{ current_user }}">
+                            <i class="la la-user"></i> Mon profil
+                        </a>
+                        <a href="/mesrooms">
+                            <i class="la la-layer-group"></i> Mes rooms
+                        </a>
+                        <a href="/admin">
+                            <i class="la la-cog"></i> Paramètres
+                        </a>
+                        <hr>
+                        <form method="post" action="{{ base_url }}">
+                            <input type="hidden" name="task" value="login.logout" />
+                            {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+                            <button type="submit">
+                                <i class="la la-sign-out-alt"></i> Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <a href="/login" class="skn-btn skn-btn--outline skn-btn--sm">
+                    <i class="la la-sign-in-alt"></i>
+                    <span>Connexion</span>
+                </a>
+                <a href="/register" class="skn-btn skn-btn--primary skn-btn--sm">
+                    <i class="la la-user-plus"></i>
+                    <span>Inscription</span>
+                </a>
+            {% endif %}
+        </div>
+
+        {# Menu mobile #}
+        <button class="skn-nav__toggle" onclick="document.querySelector('.skn-nav').classList.toggle('skn-nav--open')">
+            <i class="la la-bars"></i>
+        </button>
+    </div>
+</nav>

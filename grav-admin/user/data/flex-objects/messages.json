@@ -1,0 +1,134 @@
+{
+    "msg_696c24d39a66a": {
+        "id": "msg_696c24d39a66a",
+        "channel_type": "space",
+        "channel_id": "sdfghj",
+        "sender": "guang",
+        "content": "yo",
+        "timestamp": "2026-01-18 00:09:55",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c24e9d6e77": {
+        "id": "msg_696c24e9d6e77",
+        "channel_type": "space",
+        "channel_id": "sdfghj",
+        "sender": "guang",
+        "content": "comment va ?",
+        "timestamp": "2026-01-18 00:10:17",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c27080b494": {
+        "id": "msg_696c27080b494",
+        "channel_type": "space_external",
+        "channel_id": "demo-ia",
+        "sender": "guang",
+        "content": "yoow",
+        "timestamp": "2026-01-18 00:19:20",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c27227b05e": {
+        "id": "msg_696c27227b05e",
+        "channel_type": "space_internal",
+        "channel_id": "roooom-boy",
+        "sender": "guang",
+        "content": "salut",
+        "timestamp": "2026-01-18 00:19:46",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c276034bbd": {
+        "id": "msg_696c276034bbd",
+        "channel_type": "space_internal",
+        "channel_id": "demo-ia",
+        "sender": "guillaume",
+        "content": "salut",
+        "timestamp": "2026-01-18 00:20:48",
+        "read_by": [
+            "guillaume"
+        ]
+    },
+    "msg_696c28c919c38": {
+        "id": "msg_696c28c919c38",
+        "channel_type": "space_external",
+        "channel_id": "roooom-boy",
+        "sender": "guillaume",
+        "content": "yoooooo guang",
+        "timestamp": "2026-01-18 00:26:49",
+        "read_by": [
+            "guillaume"
+        ]
+    },
+    "msg_696c29ed65f8d": {
+        "id": "msg_696c29ed65f8d",
+        "channel_type": "space_internal",
+        "channel_id": "roooom-boy",
+        "sender": "guang",
+        "content": "wsh boy",
+        "timestamp": "2026-01-18 00:31:41",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c29f1bfc68": {
+        "id": "msg_696c29f1bfc68",
+        "channel_type": "space_external",
+        "channel_id": "roooom-boy",
+        "sender": "guang",
+        "content": "boy",
+        "timestamp": "2026-01-18 00:31:45",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c2ca392d87": {
+        "id": "msg_696c2ca392d87",
+        "channel_type": "space_internal",
+        "channel_id": "roooom-boy",
+        "sender": "guang",
+        "content": "boooooy",
+        "timestamp": "2026-01-18 00:43:15",
+        "read_by": [
+            "guang"
+        ]
+    },
+    "msg_696c2ccbb96ed": {
+        "id": "msg_696c2ccbb96ed",
+        "channel_type": "space_external",
+        "channel_id": "roooom-boy",
+        "sender": "guillaume",
+        "content": "yo",
+        "timestamp": "2026-01-18 00:43:55",
+        "read_by": [
+            "guillaume"
+        ]
+    },
+    "msg_696d451e21395": {
+        "id": "msg_696d451e21395",
+        "channel_type": "space_external",
+        "channel_id": "demo-ia",
+        "sender": "guillaume",
+        "content": "yo",
+        "timestamp": "2026-01-18 20:39:58",
+        "read_by": [
+            "guillaume"
+        ]
+    },
+    "msg_696d4557442be": {
+        "id": "msg_696d4557442be",
+        "channel_type": "space_internal",
+        "channel_id": "demo-ia",
+        "sender": "guang",
+        "content": "yo",
+        "timestamp": "2026-01-18 20:40:55",
+        "read_by": [
+            "guang"
+        ]
+    }
+}

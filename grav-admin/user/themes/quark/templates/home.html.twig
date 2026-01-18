@@ -1,0 +1,198 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{# Chargement des données Flex #}
+{% include 'partials/skn/flex-loader.html.twig' %}
+
+<div class="skn-home">
+    {# Hero Section #}
+    <section class="skn-hero">
+        <div class="skn-hero__bg"></div>
+        <div class="skn-container">
+            <div class="skn-hero__content">
+                <h1 class="skn-hero__title">
+                    <span class="skn-gradient-text">Social</span>
+                    <span>Knowledge Network</span>
+                </h1>
+                <p class="skn-hero__desc">
+                    Rejoignez des rooms thématiques près de chez vous et partagez vos connaissances.
+                </p>
+                
+                <div class="skn-hero__actions">
+                    {% if is_logged_in %}
+                        <a href="/mesrooms" class="skn-btn skn-btn--primary">
+                            <i class="la la-layer-group"></i> Mes Rooms
+                        </a>
+                        <a href="/create-room" class="skn-btn skn-btn--outline">
+                            <i class="la la-plus"></i> Créer une Room
+                        </a>
+                    {% else %}
+                        <a href="/register" class="skn-btn skn-btn--primary">
+                            <i class="la la-user-plus"></i> Rejoindre
+                        </a>
+                        <a href="/login" class="skn-btn skn-btn--outline">
+                            <i class="la la-sign-in-alt"></i> Se connecter
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Stats rapides #}
+    <section class="skn-stats">
+        <div class="skn-container">
+            <div class="skn-stats__grid">
+                <div class="skn-stats__item">
+                    <span class="skn-stats__value">{{ rooms_count }}</span>
+                    <span class="skn-stats__label">Rooms</span>
+                </div>
+                <div class="skn-stats__item">
+                    <span class="skn-stats__value">{{ users_count }}</span>
+                    <span class="skn-stats__label">Membres</span>
+                </div>
+                <div class="skn-stats__item">
+                    <span class="skn-stats__value">{{ activities|length }}</span>
+                    <span class="skn-stats__label">Activités</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# Rooms proches par géolocalisation #}
+    <section class="skn-section">
+        <div class="skn-container">
+            <div class="skn-section__header">
+                <h2><i class="la la-map-marker-alt"></i> Rooms proches de vous</h2>
+                <button id="geo-btn" class="skn-btn skn-btn--outline skn-btn--sm" onclick="requestGeolocation()">
+                    <i class="la la-crosshairs"></i> Localiser
+                </button>
+            </div>
+            
+            <div id="geo-status" class="skn-geo-status" style="display: none;">
+                <i class="la la-spinner la-spin"></i> Recherche de votre position...
+            </div>
+            
+            <div id="nearby-rooms" class="skn-card-list skn-card-list--grid skn-card-list--col-3">
+                {% if rooms_count > 0 %}
+                    {% for room in rooms|slice(0, 6) %}
+                        {% include 'partials/skn/room-card.html.twig' with {
+                            room: room,
+                            current_user: current_user,
+                            variant: 'default'
+                        } only %}
+                    {% endfor %}
+                {% else %}
+                    <div class="skn-empty-state skn-empty-state--inline">
+                        <i class="la la-layer-group"></i>
+                        <p>Aucune room pour le moment</p>
+                        {% if is_logged_in %}
+                            <a href="/create-room" class="skn-btn skn-btn--primary">
+                                <i class="la la-plus"></i> Créer la première room
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if rooms_count > 6 %}
+                <div class="skn-section__footer">
+                    <a href="/explore" class="skn-btn skn-btn--outline">
+                        Voir toutes les rooms <i class="la la-arrow-right"></i>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {# Activité récente #}
+    <section class="skn-section skn-section--alt">
+        <div class="skn-container">
+            <div class="skn-section__header">
+                <h2><i class="la la-stream"></i> Activité récente</h2>
+                <a href="/feed" class="skn-link">Voir tout <i class="la la-arrow-right"></i></a>
+            </div>
+            
+            <div class="skn-activity-list">
+                {% if activities|length > 0 %}
+                    {% for activity in activities|slice(0, 5) %}
+                        <div class="skn-activity-item">
+                            <div class="skn-activity-item__avatar">
+                                {{ activity.actor|default('?')|first|upper }}
+                            </div>
+                            <div class="skn-activity-item__content">
+                                <p>
+                                    <a href="/u/{{ activity.actor }}">{{ activity.actor|default('Utilisateur') }}</a>
+                                    <span class="skn-activity-item__verb">
+                                        {% if activity.verb == 'create' %}a créé
+                                        {% elseif activity.verb == 'join' %}a rejoint
+                                        {% elseif activity.verb == 'post' %}a posté dans
+                                        {% else %}{{ activity.verb }}
+                                        {% endif %}
+                                    </span>
+                                    {% if activity.object_type == 'space' %}
+                                        <a href="/room/{{ activity.object_id }}">{{ activity.object_id }}</a>
+                                    {% else %}
+                                        {{ activity.object_id }}
+                                    {% endif %}
+                                </p>
+                                <span class="skn-activity-item__time">{{ activity.timestamp|default('--') }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="skn-empty-state skn-empty-state--sm">
+                        <p>Aucune activité récente</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {# CTA final #}
+    {% if not is_logged_in %}
+    <section class="skn-cta">
+        <div class="skn-container">
+            <div class="skn-cta__card">
+                <h2>Rejoignez la communauté</h2>
+                <p>Créez votre compte gratuitement et commencez à participer aux discussions.</p>
+                <div class="skn-cta__actions">
+                    <a href="/register" class="skn-btn skn-btn--light">
+                        <i class="la la-user-plus"></i> Créer un compte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<script>
+function requestGeolocation() {
+    const status = document.getElementById('geo-status');
+    const btn = document.getElementById('geo-btn');
+    
+    if (!navigator.geolocation) {
+        alert('Géolocalisation non supportée par votre navigateur');
+        return;
+    }
+    
+    status.style.display = 'flex';
+    btn.disabled = true;
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            status.innerHTML = '<i class="la la-check"></i> Position trouvée !';
+            // TODO: Trier les rooms par distance
+            console.log('Position:', position.coords.latitude, position.coords.longitude);
+            setTimeout(() => { status.style.display = 'none'; btn.disabled = false; }, 2000);
+        },
+        function(error) {
+            status.innerHTML = '<i class="la la-exclamation-triangle"></i> ' + error.message;
+            btn.disabled = false;
+            setTimeout(() => { status.style.display = 'none'; }, 3000);
+        }
+    );
+}
+</script>
+{% endblock %}

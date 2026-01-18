@@ -1,0 +1,53 @@
+{# ============================================= #}
+{# PARTIAL: Liste d'utilisateurs                 #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - user_ids: tableau d'identifiants utilisateur
+{#   - accounts: collection des comptes Grav
+{#   - empty_message: message si la liste est vide
+{#   - variant: 'chip' | 'inline' | 'card' (optionnel)
+{#   - limit: nombre max à afficher (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('chip') %}
+{% set limit = limit|default(50) %}
+{% set user_ids = user_ids|default([]) %}
+
+{% if user_ids|length > 0 and accounts %}
+    <div class="skn-users-list skn-users-list--{{ variant }}">
+    {% for user_id in user_ids|slice(0, limit) %}
+        {% set user_obj = accounts.load(user_id) %}
+        {% if user_obj and user_obj.exists %}
+            {% if variant == 'chip' %}
+                <a href="/u/{{ user_obj.username }}" class="skn-user-chip">
+                    <span class="skn-user-avatar-sm">
+                        {{ user_obj.fullname|default(user_obj.username)|first|upper }}
+                    </span>
+                    <span class="skn-user-name">{{ user_obj.fullname|default(user_obj.username) }}</span>
+                </a>
+            {% elseif variant == 'inline' %}
+                {% include 'partials/social/user-card.html.twig' with {
+                    user: user_obj,
+                    variant: 'inline',
+                    show_actions: false
+                } only %}
+            {% else %}
+                {% include 'partials/social/user-card.html.twig' with {
+                    user: user_obj,
+                    variant: 'compact',
+                    show_actions: true
+                } only %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    
+    {% if user_ids|length > limit %}
+        <span class="skn-users-more">+{{ user_ids|length - limit }} autres</span>
+    {% endif %}
+    </div>
+{% else %}
+    <p class="skn-muted">{{ empty_message|default('Aucun utilisateur.') }}</p>
+{% endif %}

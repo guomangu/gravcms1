@@ -1,0 +1,63 @@
+{# ============================================= #}
+{# PARTIAL: Boîte de chat modulaire             #}
+{# ============================================= #}
+{# Params: type (external/internal), title, icon, badge, room_slug, messages, can_write, can_view, placeholder, locked_message #}
+
+{% set can_view = can_view|default(true) %}
+{% set channel_type = type == 'internal' ? 'space_internal' : 'space_external' %}
+
+<section class="skn-section skn-chat-section skn-chat-section--{{ type }}">
+    <header class="skn-section__header">
+        <h2><i class="la la-{{ icon }}"></i> {{ title }}</h2>
+        <span class="skn-badge skn-badge--{{ type == 'internal' ? 'private' : 'info' }}">{{ badge }}</span>
+    </header>
+
+    {% if can_view %}
+        {# Filtrer les messages #}
+        {% set chat_messages = [] %}
+        {% for msg in messages if msg.channel_type == channel_type and msg.channel_id == room_slug %}
+            {% set chat_messages = chat_messages|merge([msg]) %}
+        {% endfor %}
+
+        <div class="skn-chat-box skn-chat-box--{{ type }}">
+            {% if chat_messages|length > 0 %}
+                <div class="skn-chat-messages">
+                    {% for msg in chat_messages|reverse|slice(0, 25)|reverse %}
+                        {% include 'partials/atoms/message-bubble.html.twig' with {message: msg} %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="skn-chat-empty">
+                    <i class="la la-{{ type == 'internal' ? 'users' : 'comment-dots' }}"></i>
+                    <p>{{ type == 'internal' ? 'Aucun message interne' : 'Aucun message public' }}</p>
+                </div>
+            {% endif %}
+
+            {% if can_write %}
+                <form method="post" action="/send-message" class="skn-chat-input">
+                    <input type="hidden" name="channel_type" value="{{ channel_type }}">
+                    <input type="hidden" name="channel_id" value="{{ room_slug }}">
+                    {{ nonce_field('send-message', 'message-nonce')|raw }}
+                    <input type="text" name="content" placeholder="{{ placeholder }}" class="skn-input" required autocomplete="off">
+                    <button type="submit" class="skn-btn skn-btn--{{ type == 'internal' ? 'primary' : 'outline' }}">
+                        <i class="la la-paper-plane"></i>
+                    </button>
+                </form>
+            {% elseif not is_logged_in %}
+                <div class="skn-chat-login-prompt">
+                    <a href="/login?redirect={{ uri.path|url_encode }}" class="skn-link">
+                        <i class="la la-sign-in-alt"></i> Connectez-vous pour écrire
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        {# Vue verrouillée #}
+        <div class="skn-chat-locked">
+            <div class="skn-chat-locked__content">
+                <i class="la la-lock"></i>
+                <p>{{ locked_message|default('Réservé aux membres') }}</p>
+            </div>
+        </div>
+    {% endif %}
+</section>

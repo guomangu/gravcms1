@@ -1,0 +1,83 @@
+{# ============================================= #}
+{# PARTIAL: Panneau de vote pour les demandes   #}
+{# ============================================= #}
+{# Params: requests, total_members, current_user #}
+
+<section class="skn-section skn-vote-section">
+    <header class="skn-section__header">
+        <h2><i class="la la-vote-yea"></i> Demandes d'adhésion</h2>
+        <span class="skn-badge skn-badge--warning">{{ requests|length }}</span>
+    </header>
+    
+    <div class="skn-vote-list">
+        {% for item in requests %}
+            {% set req = item.data %}
+            {% set req_key = item.key %}
+            {% set accepts = req.votes_accept|default([])|length %}
+            {% set rejects = req.votes_reject|default([])|length %}
+            {% set has_voted = current_user in req.votes_accept|default([]) or current_user in req.votes_reject|default([]) %}
+            {% set my_vote = current_user in req.votes_accept|default([]) ? 'accept' : (current_user in req.votes_reject|default([]) ? 'reject' : null) %}
+            {% set majority = ((total_members) / 2)|round(0, 'ceil') %}
+            
+            <div class="skn-vote-card">
+                <div class="skn-vote-card__user">
+                    <div class="skn-avatar skn-avatar--sm">{{ req.username|first|upper }}</div>
+                    <div>
+                        <strong>{{ req.username }}</strong>
+                        <span class="skn-text-muted skn-text-sm">veut rejoindre</span>
+                    </div>
+                </div>
+                
+                <div class="skn-vote-card__progress">
+                    <div class="skn-vote-bar">
+                        {% set pct_accept = total_members > 0 ? (accepts / total_members * 100) : 0 %}
+                        {% set pct_reject = total_members > 0 ? (rejects / total_members * 100) : 0 %}
+                        <div class="skn-vote-bar__accept" style="width: {{ pct_accept }}%"></div>
+                        <div class="skn-vote-bar__reject" style="width: {{ pct_reject }}%"></div>
+                    </div>
+                    <div class="skn-vote-stats">
+                        <span class="skn-text-success"><i class="la la-check"></i> {{ accepts }}</span>
+                        <span class="skn-text-danger"><i class="la la-times"></i> {{ rejects }}</span>
+                        <span class="skn-text-muted">/ {{ total_members }} (maj: {{ majority }})</span>
+                    </div>
+                </div>
+                
+                <div class="skn-vote-card__actions">
+                    {% if req.username == current_user %}
+                        <span class="skn-text-muted">Votre demande</span>
+                    {% elseif has_voted %}
+                        <span class="skn-badge skn-badge--{{ my_vote == 'accept' ? 'success' : 'danger' }} skn-badge--sm">
+                            {{ my_vote == 'accept' ? 'Pour' : 'Contre' }}
+                        </span>
+                        {# Changer de vote #}
+                        <form method="post" action="/social-action" class="skn-inline-form">
+                            <input type="hidden" name="action" value="vote-{{ my_vote == 'accept' ? 'reject' : 'accept' }}">
+                            <input type="hidden" name="target" value="{{ req_key }}">
+                            {{ nonce_field('social-action', 'social-nonce')|raw }}
+                            <button type="submit" class="skn-btn skn-btn--xs skn-btn--ghost" title="Changer">
+                                <i class="la la-sync"></i>
+                            </button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="/social-action" class="skn-inline-form">
+                            <input type="hidden" name="action" value="vote-accept">
+                            <input type="hidden" name="target" value="{{ req_key }}">
+                            {{ nonce_field('social-action', 'social-nonce')|raw }}
+                            <button type="submit" class="skn-btn skn-btn--sm skn-btn--success">
+                                <i class="la la-check"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="/social-action" class="skn-inline-form">
+                            <input type="hidden" name="action" value="vote-reject">
+                            <input type="hidden" name="target" value="{{ req_key }}">
+                            {{ nonce_field('social-action', 'social-nonce')|raw }}
+                            <button type="submit" class="skn-btn skn-btn--sm skn-btn--danger">
+                                <i class="la la-times"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>

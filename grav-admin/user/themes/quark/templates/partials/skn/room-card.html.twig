@@ -1,0 +1,45 @@
+{# ============================================= #}
+{# PARTIAL: Card de Room                         #}
+{# ============================================= #}
+{# 
+{# Variables:
+{#   - room: objet room Flex
+{#   - current_user: username courant
+{#   - show_edit: afficher bouton edit
+{#   - variant: 'default' | 'compact' | 'featured'
+{# --------------------------------------------- #}
+
+{% set variant = variant|default('default') %}
+{% set show_edit = show_edit|default(false) %}
+
+{% set slug = room.slug|default(room.key|default('')) %}
+{% set name = room.name|default('Room sans nom') %}
+{% set description = room.description|default('') %}
+{% set access = room.access_level|default('public') %}
+{% set members = room.members|default([]) %}
+{% set admins = room.admins|default([]) %}
+{% set member_count = members|length %}
+{% set is_member = current_user and (current_user in members) %}
+{% set is_admin = current_user and (current_user in admins) %}
+
+{% set can_edit = is_admin or show_edit %}
+
+{% include 'partials/skn/card.html.twig' with {
+    title: name,
+    avatar: name|first|upper,
+    badge: access|capitalize,
+    badge_type: access,
+    description: description,
+    link: '/room/' ~ slug,
+    edit_link: can_edit ? '/admin/flex-objects/social-spaces/' ~ slug : null,
+    stats: [
+        {icon: 'users', value: member_count, label: 'Membres'}
+    ],
+    actions: is_member ? [
+        {url: '/room/' ~ slug, label: 'Entrer', icon: 'sign-in-alt', style: 'primary'}
+    ] : [
+        {url: '/room/' ~ slug, label: 'Voir', icon: 'eye', style: 'outline'}
+    ],
+    variant: variant,
+    clickable: true
+} only %}

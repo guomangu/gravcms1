@@ -1,0 +1,28 @@
+{# ============================================= #}
+{# PARTIAL: Page d'authentification requise      #}
+{# ============================================= #}
+{# 
+{# Variables:
+{#   - message: message personnalisé (optionnel)
+{#   - redirect: URL de redirection après login (optionnel)
+{# --------------------------------------------- #}
+
+{% set message = message|default('Vous devez être connecté pour accéder à cette page.') %}
+
+<div class="skn-require-auth">
+    <div class="skn-require-auth__card">
+        <div class="skn-require-auth__icon">
+            <i class="la la-lock"></i>
+        </div>
+        <h1>Connexion requise</h1>
+        <p>{{ message }}</p>
+        <div class="skn-require-auth__actions">
+            <a href="/login{% if redirect %}?redirect={{ redirect }}{% endif %}" class="skn-btn skn-btn--primary">
+                <i class="la la-sign-in-alt"></i> Se connecter
+            </a>
+            <a href="/register" class="skn-btn skn-btn--outline">
+                <i class="la la-user-plus"></i> Créer un compte
+            </a>
+        </div>
+    </div>
+</div>

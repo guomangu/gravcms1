@@ -1,0 +1,156 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{# Chargement des données Flex #}
+{% set current_user = grav.user.username|default(null) %}
+{% set flex = grav.get('flex_objects') %}
+{% set space_dir = flex ? flex.getDirectory('social-spaces') : null %}
+{% set accounts = grav.accounts is defined ? grav.accounts : null %}
+
+{# Extraction de l'identifiant depuis l'URI #}
+{% set request_slug = uri.path|split('/u/')|last %}
+
+{# Chargement de l'utilisateur cible #}
+{% set target_user = accounts ? accounts.load(request_slug) : null %}
+{% set is_own_profile = current_user == request_slug %}
+
+{% if target_user and target_user.exists %}
+    {% set following = target_user.relations.following|default([]) %}
+    {% set followers = target_user.relations.followers|default([]) %}
+    {% set user_spaces = target_user.relations.spaces|default([]) %}
+    
+    <div class="skn-profile-page">
+        {# Profile Header #}
+        <header class="skn-profile-header">
+            <div class="skn-profile-avatar-large">
+                {{ target_user.fullname|default(target_user.username)|first|upper }}
+            </div>
+            <div class="skn-profile-info">
+                <h1 class="skn-profile-name">
+                    {{ target_user.fullname|default(target_user.username) }}
+                </h1>
+                <span class="skn-profile-username">@{{ target_user.username }}</span>
+                
+                {# Actions de profil - Modulaires #}
+                {% include 'partials/social/profile-actions.html.twig' with {
+                    target_user: target_user,
+                    current_user: current_user,
+                    is_own_profile: is_own_profile,
+                    followers: followers
+                } only %}
+            </div>
+        </header>
+
+        {# Stats Bar avec composants modulaires #}
+        <div class="skn-profile-stats">
+            {% include 'partials/social/stat-card.html.twig' with {
+                value: following|length,
+                label: 'Abonnements',
+                variant: 'compact'
+            } only %}
+            {% include 'partials/social/stat-card.html.twig' with {
+                value: followers|length,
+                label: 'Abonnés',
+                variant: 'compact'
+            } only %}
+            {% include 'partials/social/stat-card.html.twig' with {
+                value: user_spaces|length,
+                label: 'Espaces',
+                variant: 'compact'
+            } only %}
+        </div>
+
+        <div class="skn-profile-content">
+            {# Bio Section #}
+            <section class="skn-card">
+                <h2 class="skn-card-title"><i class="la la-user-circle"></i> À propos</h2>
+                {% if target_user.profile.bio is defined and target_user.profile.bio %}
+                    <div class="skn-bio-content">
+                        {{ target_user.profile.bio|markdown }}
+                    </div>
+                {% else %}
+                    {% include 'partials/social/empty-state.html.twig' with {
+                        message: 'Aucune biographie renseignée.',
+                        cta_url: is_own_profile ? '/admin' : null,
+                        cta_label: 'Ajouter une bio',
+                        cta_icon: 'edit',
+                        current_user: is_own_profile ? current_user : null,
+                        variant: 'inline'
+                    } only %}
+                {% endif %}
+            </section>
+
+            {# Expertise Tags #}
+            {% set expertise = target_user.profile.expertise|default([]) %}
+            {% if expertise|length > 0 %}
+            <section class="skn-card">
+                <h2 class="skn-card-title"><i class="la la-tags"></i> Expertise</h2>
+                {{ macros.tag_list(expertise, 10) }}
+            </section>
+            {% endif %}
+
+            {# Espaces #}
+            <section class="skn-card">
+                <h2 class="skn-card-title"><i class="la la-layer-group"></i> Espaces</h2>
+                {% if user_spaces|length > 0 and space_dir %}
+                    <div class="skn-mini-grid">
+                    {% for space_slug in user_spaces %}
+                        {% set space = space_dir.getObject(space_slug) %}
+                        {% if space %}
+                            <a href="/s/{{ space.slug }}" class="skn-mini-card">
+                                <span class="skn-mini-icon">{{ space.name|default('?')|first|upper }}</span>
+                                <span class="skn-mini-name">{{ space.name|default(space_slug) }}</span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    {% include 'partials/social/empty-state.html.twig' with {
+                        message: 'Aucun espace rejoint.',
+                        cta_url: is_own_profile ? '/explore' : null,
+                        cta_label: 'Explorer les espaces',
+                        cta_icon: 'compass',
+                        cta_style: 'outline',
+                        current_user: is_own_profile ? current_user : null,
+                        variant: 'inline'
+                    } only %}
+                {% endif %}
+            </section>
+
+            {# Abonnements #}
+            <section class="skn-card">
+                <h2 class="skn-card-title"><i class="la la-user-friends"></i> Abonnements</h2>
+                {% include 'partials/social/user-list.html.twig' with {
+                    user_ids: following,
+                    accounts: accounts,
+                    empty_message: 'Ne suit personne pour le moment.',
+                    variant: 'chip'
+                } only %}
+            </section>
+
+            {# Abonnés #}
+            <section class="skn-card">
+                <h2 class="skn-card-title"><i class="la la-heart"></i> Abonnés</h2>
+                {% include 'partials/social/user-list.html.twig' with {
+                    user_ids: followers,
+                    accounts: accounts,
+                    empty_message: 'Aucun abonné pour le moment.',
+                    variant: 'chip'
+                } only %}
+            </section>
+        </div>
+    </div>
+{% else %}
+    {# Utilisateur introuvable #}
+    {% include 'partials/social/error-page.html.twig' with {
+        icon: 'user-slash',
+        title: 'Utilisateur introuvable',
+        message: "L'utilisateur <strong>" ~ request_slug ~ "</strong> n'existe pas.",
+        cta_url: '/explore',
+        cta_label: 'Explorer la communauté',
+        cta_icon: 'compass'
+    } only %}
+{% endif %}
+{% endblock %}

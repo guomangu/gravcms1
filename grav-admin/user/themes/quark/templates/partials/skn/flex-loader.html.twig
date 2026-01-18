@@ -1,0 +1,29 @@
+{# ============================================= #}
+{# PARTIAL: Chargeur de données SKN              #}
+{# ============================================= #}
+{# Usage: {% include 'partials/skn/flex-loader.html.twig' %}
+{# 
+{# Variables d'authentification (grav_user, current_user, is_logged_in) 
+{# sont définies dans base.html.twig et disponibles globalement.
+{#
+{# Variables exposées par SocialCorePlugin (via onTwigSiteVariables):
+{#   - rooms, rooms_count, rooms_dir
+{#   - messages, messages_count
+{#   - activities
+{#   - flex_loaded, flex_debug
+{#
+{# Variables additionnelles chargées ici:
+{#   - accounts, users_count
+{# --------------------------------------------- #}
+
+{# NOTE: grav_user, current_user, is_logged_in sont définis dans base.html.twig #}
+{# NOTE: rooms, messages, activities sont chargés par SocialCorePlugin #}
+
+{# Comptes utilisateurs #}
+{% set accounts = grav.accounts is defined ? grav.accounts : null %}
+{% set users_count = 0 %}
+{% if accounts %}
+    {% for u in accounts %}
+        {% set users_count = users_count + 1 %}
+    {% endfor %}
+{% endif %}

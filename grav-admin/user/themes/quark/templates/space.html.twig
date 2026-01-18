@@ -1,0 +1,132 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{# Chargement des données Flex #}
+{% set current_user = grav.user.username|default(null) %}
+{% set flex = grav.get('flex_objects') %}
+
+{% set space_dir = flex ? flex.getDirectory('social-spaces') : null %}
+{% set message_dir = flex ? flex.getDirectory('messages') : null %}
+{% set accounts = grav.accounts is defined ? grav.accounts : null %}
+
+{# Extraction de l'identifiant depuis l'URI #}
+{% set request_slug = uri.path|split('/s/')|last %}
+
+{# Chargement de l'espace cible #}
+{% set target_space = space_dir ? space_dir.getObject(request_slug) : null %}
+
+{% if target_space %}
+    {% set members = target_space.members|default([]) %}
+    {% set admins = target_space.admins|default([]) %}
+    {% set is_member = current_user in members %}
+    {% set is_admin = current_user in admins %}
+    
+    <div class="skn-space-page">
+        {# Space Header - Partial modulaire #}
+        {% include 'partials/social/space-header.html.twig' with {
+            space: target_space,
+            current_user: current_user,
+            is_member: is_member,
+            is_admin: is_admin
+        } only %}
+
+        {# Stats #}
+        <div class="skn-space-stats">
+            {{ macros.icon_label('users', members|length ~ ' membres') }}
+            {% set doc_count = 0 %}
+            {% for p in pages.all %}
+                {% if p.header.space_slug is defined and p.header.space_slug == target_space.slug %}
+                    {% set doc_count = doc_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {{ macros.icon_label('file-alt', doc_count ~ ' documents') }}
+        </div>
+
+        <div class="skn-space-content">
+            {# Description - Manifeste #}
+            <section class="skn-card skn-card-lg">
+                <h2 class="skn-card-title"><i class="la la-scroll"></i> Manifeste</h2>
+                {% if target_space.description %}
+                    <div class="skn-description-content">
+                        {{ target_space.description|markdown }}
+                    </div>
+                {% else %}
+                    {% include 'partials/social/empty-state.html.twig' with {
+                        message: 'Aucune description renseignée.',
+                        cta_url: is_admin ? '/admin/flex-objects/social-spaces/' ~ target_space.slug : null,
+                        cta_label: 'Ajouter une description',
+                        cta_icon: 'edit',
+                        current_user: is_admin ? current_user : null,
+                        variant: 'inline'
+                    } only %}
+                {% endif %}
+            </section>
+
+            <div class="skn-space-grid">
+                {# Admins Section #}
+                <section class="skn-card">
+                    <h2 class="skn-card-title">
+                        <i class="la la-shield-alt"></i> Administrateurs
+                        <span class="skn-count">{{ admins|length }}</span>
+                    </h2>
+                    {% include 'partials/social/user-list.html.twig' with {
+                        user_ids: admins,
+                        accounts: accounts,
+                        empty_message: 'Aucun administrateur.',
+                        variant: 'chip'
+                    } only %}
+                </section>
+
+                {# Members Section #}
+                <section class="skn-card">
+                    <h2 class="skn-card-title">
+                        <i class="la la-users"></i> Membres
+                        <span class="skn-count">{{ members|length }}</span>
+                    </h2>
+                    {% set regular_members = [] %}
+                    {% for m in members %}
+                        {% if m not in admins %}
+                            {% set regular_members = regular_members|merge([m]) %}
+                        {% endif %}
+                    {% endfor %}
+                    {% include 'partials/social/user-list.html.twig' with {
+                        user_ids: regular_members,
+                        accounts: accounts,
+                        empty_message: 'Aucun autre membre pour le moment.',
+                        variant: 'chip'
+                    } only %}
+                </section>
+            </div>
+
+            {# Wiki Documents #}
+            {% include 'partials/social/documents-section.html.twig' with {
+                space: target_space,
+                pages: pages,
+                is_member: is_member
+            } only %}
+
+            {# Discussion de l'espace #}
+            {% include 'partials/social/space-chat.html.twig' with {
+                space: target_space,
+                messages_dir: message_dir,
+                accounts: accounts,
+                current_user: current_user,
+                is_member: is_member
+            } only %}
+        </div>
+    </div>
+{% else %}
+    {% include 'partials/social/error-page.html.twig' with {
+        icon: 'folder-minus',
+        title: 'Espace introuvable',
+        message: "L'espace <strong>" ~ request_slug ~ "</strong> n'existe pas.",
+        cta_url: '/explore',
+        cta_label: 'Explorer les espaces',
+        cta_icon: 'compass',
+        alt_url: current_user ? '/create-room' : null,
+        alt_label: 'Créer un espace'
+    } only %}
+{% endif %}
+{% endblock %}

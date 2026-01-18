@@ -1,0 +1,9 @@
+username: jean
+state: enabled
+email: jean@gmail.com
+fullname: Jean
+title: Membre
+access:
+  site:
+    login: true
+hashed_password: $2y$12$E.DgwQtYlIzUKiEY.5bX8erYrb7BjAztRJsazKoysVoNsOBPjRUNu

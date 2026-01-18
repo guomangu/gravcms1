@@ -1,0 +1,19 @@
+extends@: default
+
+form:
+  fields:
+    tabs:
+      fields:
+        options:
+          fields:
+            social_context:
+              type: section
+              title: Contexte Social
+              underline: true
+              fields:
+                header.space_slug:
+                  type: select
+                  label: Espace Parent
+                  help: "Lier cette page à un Espace Social"
+                  data-options@: '\Grav\Common\Flex\Flex::directory:social-spaces.getCollection.items'
+                  # Note: This might need adjustment depending on how Flex handles data-options for directories

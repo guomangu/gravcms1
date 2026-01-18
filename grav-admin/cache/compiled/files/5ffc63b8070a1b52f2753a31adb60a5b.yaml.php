@@ -1,0 +1,40 @@
+<?php
+return [
+    '@class' => 'Grav\\Common\\File\\CompiledYamlFile',
+    'filename' => '/home/gu/g2/grav-admin/user/plugins/social-core/blueprints.yaml',
+    'modified' => 1768677115,
+    'size' => 662,
+    'data' => [
+        'name' => 'Social Core',
+        'version' => '1.0.0',
+        'description' => 'Core logic for the Social Knowledge Network.',
+        'icon' => 'fa-share-alt',
+        'author' => [
+            'name' => 'Antigravity',
+            'email' => 'antigravity@ai.com'
+        ],
+        'homepage' => 'https://github.com/antigravity',
+        'keywords' => 'grav, plugin, social, wiki, flex-objects',
+        'bugs' => 'https://github.com/antigravity/issues',
+        'docs' => 'https://github.com/antigravity/blob/develop/README.md',
+        'license' => 'MIT',
+        'form' => [
+            'validation' => 'strict',
+            'fields' => [
+                'enabled' => [
+                    'type' => 'toggle',
+                    'label' => 'PLUGIN_ADMIN.PLUGIN_STATUS',
+                    'highlight' => 1,
+                    'default' => 0,
+                    'options' => [
+                        1 => 'PLUGIN_ADMIN.ENABLED',
+                        0 => 'PLUGIN_ADMIN.DISABLED'
+                    ],
+                    'validate' => [
+                        'type' => 'bool'
+                    ]
+                ]
+            ]
+        ]
+    ]
+];

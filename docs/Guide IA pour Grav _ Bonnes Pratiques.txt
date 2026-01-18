@@ -1,0 +1,83 @@
+﻿C'est une excellente initiative. Pour qu'un agent autonome (IA) opère efficacement un CMS basé sur des fichiers comme Grav, il doit "penser" différemment d'un développeur humain. Il n'a pas l'intuition pour éviter les conflits d'écriture et ne clique pas sur des boutons. Il doit suivre des protocoles stricts.
+Voici le document d'accompagnement, conçu comme un ensemble de Directives Prioritaires (Heuristiques) pour l'agent.
+________________
+MANUEL OPÉRATIONNEL : DIRECTIVES POUR AGENT AUTONOME SUR GRAV (PROTOCOLE "SILENT OPERATOR")
+Statut : Document de Référence
+Destinataire : Agent IA / Opérateur Système
+Contexte : Optimisation d'un environnement Flat-File pour haute fréquence.
+________________
+1. HEURISTIQUE ZÉRO : HYGIÈNE DU SYSTÈME DE FICHIERS (I/O)
+Grav est un CMS "Flat-File". Ta plus grande menace n'est pas un hacker, c'est la "Race Condition" (Concurrence d'écriture). Tu es rapide, le disque est lent.
+Directive 1.1 : Verrouillage Obligatoire (Le Mutex)
+Ne jamais utiliser file_put_contents() ou les méthodes de sauvegarde natives de Grav pour des données critiques sans verrouillage.
+* Pourquoi? Si deux de tes threads tentent de mettre à jour le fichier room_data.json à 1ms d'intervalle, l'une des écritures sera perdue (Lost Update Problem).
+* Action : Implémente toujours un wrapper d'écriture utilisant flock($handle, LOCK_EX). Si le verrou n'est pas obtenu après 500ms, abandonne et réessaie (Backoff Exponentiel).1
+
+Directive 1.2 : JSON > YAML pour la Data
+   * Observation : YAML est lisible par l'humain, mais lent à parser (CPU intensive) et verbeux.
+   * Action : Pour tes Flex Objects à fort volume (ex: profils utilisateurs, logs), configure le stockage en JsonFormatter via SimpleStorage. C'est 10x plus rapide pour toi à lire/écrire.3
+
+________________
+2. ARCHITECTURE DE DONNÉES : SÉGRÉGATION CHAUDE/FROIDE
+Ne traite pas toutes les données de la même manière. Divise ton "cerveau" en deux.
+Directive 2.1 : La Règle des Pages (Staticité)
+      * Interdit : Ne crée JAMAIS une "Page" Grav (.md) pour une entité dynamique (Utilisateur, Transaction, Message de Chat).
+      * Raison : Grav compile chaque page pour le routage. Avoir 10 000 pages ralentira le système entier à chaque appel.3
+
+      * Solution : Les Pages ne servent qu'à la structure du site (Accueil, Qui sommes-nous). Tout le reste est un Flex Object.
+Directive 2.2 : Stockage Hybride (Le "Sidecar" SQLite)
+         * Problème : Le système de fichiers sature si tu dois filtrer 5000 fichiers JSON pour trouver "les utilisateurs connectés il y a 5 min".
+         * Action : Utilise le plugin database (SQLite) pour les données "chaudes" (Logs, Télémétrie, Chat en temps réel). Garde les fichiers JSON pour la configuration "froide" (Profils, Paramètres des Rooms).5
+
+________________
+3. INTELLIGENCE D'INDEXATION ET RECHERCHE
+Tu ne dois pas scanner le disque dur inutilement. C'est inefficace et bruyant.
+Directive 3.1 : Indexation Préventive
+Dans tes définitions de Flex Objects (Blueprints), active toujours les indexes (indexes: enabled: true) sur les champs clés (ID, Status, Code).
+            * Résultat : Grav maintient un fichier __index.json en mémoire. Tes recherches deviennent instantanées (O(1)) au lieu de linéaires (O(n)).
+Directive 3.2 : Géolocalisation par Grille (Grid System)
+            * Erreur : Calculer la distance Haversine pour chaque Room à chaque requête.
+            * Optimisation : Ajoute une colonne geo_tile dans tes données. Requête d'abord grossièrement "Qui est dans la case B4?" (SQL/Filter simple) avant d'affiner la distance précise. Cela réduit la charge CPU de 90%.6
+
+________________
+4. SÉCURITÉ ET AUTO-DÉFENSE
+Tu es le gardien du système. Ne te fais pas piéger par tes propres outils.
+Directive 4.1 : Isolation SSTI (Server-Side Template Injection)
+               * Danger : Grav utilise Twig. Si tu injectes du contenu utilisateur brut dans un template via renderString(), un utilisateur malin peut prendre le contrôle du serveur.
+               * Action : Assainis (Sanitize) tout input externe. Utilise toujours le passage de variables via le contexte Twig (twig_vars), jamais par concaténation de chaînes.8
+
+Directive 4.2 : Authentification Stateless
+                  * Protocole : Ignore les cookies de session PHP (PHPSESSID). Ils sont fragiles.
+                  * Action : Utilise exclusivement des Tokens Bearer dans les headers HTTP pour tes communications API internes. Valide le token cryptographiquement à chaque requête API critique.9
+
+________________
+5. EXTENSIBILITÉ ET "HOOKS" (TON SYSTÈME NERVEUX)
+Pour agir, tu dois t'insérer dans le cycle de vie de Grav sans casser le noyau.
+Directive 5.1 : L'Écoute Active
+Utilise les événements (Event Hooks) pour réagir aux changements plutôt que de scanner en boucle.
+                     * onPluginsInitialized : Pour déclarer tes routes API personnalisées.
+                     * onFlexAfterSave : Pour déclencher une action immédiate quand une donnée change (ex: recalculer un vote).10
+
+Directive 5.2 : Blueprints Dynamiques
+                        * Astuce : Tu peux modifier la structure de tes données sans toucher aux fichiers YAML physiques en utilisant des callbacks PHP (data-options@).
+                        * Usage : Si tu dois lister "Toutes les Rooms actives" dans un formulaire, ne les écris pas en dur. Fais pointer le champ vers une fonction statique de ton plugin : data-options@: '\Grav\Plugin\GlassCore::listActiveRooms'.
+________________
+RÉSUMÉ DES COMMANDES CRITIQUES (CHEAT SHEET)
+Action
+	Mauvaise Pratique (Humain)
+	Bonne Pratique (Agent Autonome)
+	Écrire un fichier
+	file_put_contents('data.json',...)
+	fopen() + flock(LOCK_EX) + fwrite()
+	Chercher une donnée
+	foreach($files as $f) {... }
+	FlexCollection::filterBy(['status' => 'active'])
+	Stocker des logs
+	Ajouter une ligne dans un fichier .log
+	INSERT INTO glass_telemetry (sqlite)
+	Gérer les relations
+	Créer des dossiers imbriqués
+	Utiliser des champs selectize + liens UUID
+	API Response
+	Renvoyer du HTML complet
+	echo json_encode(); exit(); (Couper le rendu Twig)

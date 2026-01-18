@@ -1,0 +1,16 @@
+name: Intelligence Artificielle
+slug: demo-ia
+description: |
+  Espace dédié à l'exploration et au partage de connaissances sur l'intelligence artificielle, le machine learning et le deep learning.
+  
+  **Sujets abordés :**
+  - Réseaux de neurones
+  - NLP et traitement du langage
+  - Vision par ordinateur
+  - IA générative
+access_level: public
+admins:
+  - guillaume
+members:
+  - guillaume
+published: true

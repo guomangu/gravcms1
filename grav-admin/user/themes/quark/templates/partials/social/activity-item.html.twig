@@ -1,0 +1,53 @@
+{# ============================================= #}
+{# PARTIAL: Item d'activité réutilisable         #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - activity: objet activité Flex
+{#   - variant: 'default' | 'compact' (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('default') %}
+{% set actor = activity.actor|default('Utilisateur') %}
+{% set verb = activity.verb|default('action') %}
+{% set object_type = activity.object_type|default('item') %}
+{% set object_id = activity.object_id|default('') %}
+{% set timestamp = activity.timestamp|default('--') %}
+
+<div class="skn-activity-item skn-activity-item--{{ variant }}">
+    {# Avatar de l'acteur #}
+    <div class="skn-activity-item__avatar">
+        {{ macros.avatar(actor, variant == 'compact' ? 'sm' : 'md', '/u/' ~ actor) }}
+    </div>
+    
+    {# Contenu de l'activité #}
+    <div class="skn-activity-item__content">
+        <p class="skn-activity-item__text">
+            {# Lien vers l'acteur #}
+            {{ macros.user_link(actor, actor) }}
+            
+            {# Verbe traduit #}
+            <span class="skn-activity-item__verb">
+                {{ macros.activity_verb(verb) }}
+            </span>
+            
+            {# Objet selon son type #}
+            {% if object_id %}
+                {% if object_type == 'space' %}
+                    {{ macros.space_link(object_id, object_id) }}
+                {% elseif object_type == 'user' %}
+                    {{ macros.user_link(object_id, object_id) }}
+                {% elseif object_type == 'page' or object_type == 'document' %}
+                    <a href="{{ object_id }}" class="skn-link-object">{{ object_id }}</a>
+                {% else %}
+                    <span class="skn-link-object">{{ object_id }}</span>
+                {% endif %}
+            {% endif %}
+        </p>
+        
+        {# Timestamp #}
+        {{ macros.time_ago(timestamp) }}
+    </div>
+</div>

@@ -1,0 +1,21 @@
+{# ============================================= #}
+{# ATOM: Carte Utilisateur                     #}
+{# ============================================= #}
+{# Variables requises: user                     #}
+{% set user_name = user.fullname|default(user.username|default('Anonyme')) %}
+{% set user_username = user.username|default('') %}
+{% set user_avatar = user.avatar|default(null) %}
+
+<a href="/profile/{{ user_username }}" class="skn-user-card">
+    <div class="skn-user-card__avatar">
+        {% if user_avatar %}
+            <img src="{{ user_avatar }}" alt="{{ user_name }}">
+        {% else %}
+            {{ user_name|first|upper }}
+        {% endif %}
+    </div>
+    <div class="skn-user-card__content">
+        <h4 class="skn-user-card__name">{{ user_name }}</h4>
+        <span class="skn-user-card__username">@{{ user_username }}</span>
+    </div>
+</a>

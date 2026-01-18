@@ -1,0 +1,59 @@
+{# ============================================= #}
+{# ATOM: Messages flash                        #}
+{# ============================================= #}
+{# Récupère les messages de Grav #}
+{% set all_messages = grav.messages.fetch %}
+
+{% if all_messages|length > 0 %}
+    <div class="skn-flash-messages">
+        {% for message_data in all_messages %}
+            {% set type = message_data.scope|default('info') %}
+            {% set message = message_data.message|default('') %}
+            <div class="skn-flash skn-flash--{{ type }}">
+                <span class="skn-flash__icon">
+                    {% if type == 'error' %}
+                        <i class="la la-exclamation-circle"></i>
+                    {% elseif type == 'warning' %}
+                        <i class="la la-exclamation-triangle"></i>
+                    {% elseif type == 'success' %}
+                        <i class="la la-check-circle"></i>
+                    {% else %}
+                        <i class="la la-info-circle"></i>
+                    {% endif %}
+                </span>
+                <span class="skn-flash__text">{{ message|raw }}</span>
+                <button class="skn-flash__close" onclick="this.parentElement.remove()">
+                    <i class="la la-times"></i>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{# Affichage des diagnostics Flex Objects (si disponibles et si erreurs) #}
+{% if flex_status is defined and flex_status|length > 0 %}
+    {% set has_errors = false %}
+    {% for status in flex_status %}
+        {% if 'ERREUR' in status %}
+            {% set has_errors = true %}
+        {% endif %}
+    {% endfor %}
+    
+    {% if has_errors %}
+        <div class="skn-flash-messages skn-diagnostics">
+            {% for status in flex_status %}
+                {% if 'ERREUR' in status %}
+                    <div class="skn-flash skn-flash--error">
+                        <span class="skn-flash__icon"><i class="la la-bug"></i></span>
+                        <span class="skn-flash__text">{{ status }}</span>
+                    </div>
+                {% elseif 'INFO' in status %}
+                    <div class="skn-flash skn-flash--info">
+                        <span class="skn-flash__icon"><i class="la la-info-circle"></i></span>
+                        <span class="skn-flash__text">{{ status }}</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,28 @@
+{# ============================================= #}
+{# PARTIAL: Statut de connexion                 #}
+{# ============================================= #}
+{% set user = grav.user %}
+{% set user_authenticated = user.authenticated|default(false) %}
+{% set is_logged_in = user_authenticated and user.username is not empty %}
+
+{% if is_logged_in %}
+    <div class="skn-user-status">
+        <span class="skn-user-status__name">
+            {{ user.fullname|default(user.username) }}
+        </span>
+        <a href="{{ uri.addNonce(base_url ~ '/login/task:login.logout', 'logout-form', 'logout-nonce') }}" 
+           class="skn-btn skn-btn--sm skn-btn--outline" 
+           title="Se déconnecter">
+            <i class="la la-sign-out-alt"></i>
+        </a>
+    </div>
+{% else %}
+    <div class="skn-auth-links">
+        <a href="/login" class="skn-btn skn-btn--sm skn-btn--outline">
+            <i class="la la-sign-in-alt"></i> Connexion
+        </a>
+        <a href="/register" class="skn-btn skn-btn--sm skn-btn--primary">
+            <i class="la la-user-plus"></i> Inscription
+        </a>
+    </div>
+{% endif %}

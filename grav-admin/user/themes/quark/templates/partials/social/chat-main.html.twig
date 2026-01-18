@@ -1,0 +1,121 @@
+{# ============================================= #}
+{# PARTIAL: Zone principale de chat              #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - current_user: username courant
+{#   - channel_type: type de canal (global, space, direct)
+{#   - channel_id: id du canal
+{#   - space_dir: directory des espaces
+{#   - accounts: collection des comptes
+{#   - messages_all: tous les messages
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{# Header du chat selon le type #}
+<div class="skn-chat-header">
+    {% if channel_type == 'global' %}
+        <div class="skn-chat-header-avatar skn-chat-space">
+            <i class="la la-globe"></i>
+        </div>
+        <div class="skn-chat-header-info">
+            <h3>Chat Global</h3>
+            <span class="skn-chat-header-status">Discussion ouverte à tous les membres</span>
+        </div>
+    {% elseif channel_type == 'space' %}
+        {% set space = space_dir ? space_dir.getObject(channel_id) : null %}
+        <div class="skn-chat-header-avatar skn-chat-space">
+            {{ (space ? space.name : channel_id)|first|upper }}
+        </div>
+        <div class="skn-chat-header-info">
+            <h3>{{ space ? space.name : channel_id }}</h3>
+            <span class="skn-chat-header-status">{{ space ? space.members|default([])|length : 0 }} membres</span>
+        </div>
+        <div class="skn-chat-header-actions">
+            {{ macros.btn('/s/' ~ channel_id, 'Voir l\'espace', 'external-link-alt', 'outline', 'sm') }}
+        </div>
+    {% elseif channel_type == 'direct' %}
+        {% set other_user = accounts ? accounts.load(channel_id) : null %}
+        {% set other_name = other_user and other_user.exists ? other_user.fullname|default(channel_id) : channel_id %}
+        <div class="skn-chat-header-avatar">
+            {{ other_name|first|upper }}
+        </div>
+        <div class="skn-chat-header-info">
+            <h3>{{ other_name }}</h3>
+            <span class="skn-chat-header-status">@{{ channel_id }}</span>
+        </div>
+        <div class="skn-chat-header-actions">
+            {{ macros.btn('/u/' ~ channel_id, 'Profil', 'user', 'outline', 'sm') }}
+        </div>
+    {% endif %}
+</div>
+
+{# Messages #}
+<div class="skn-chat-messages" id="chat-messages">
+    {% set channel_messages = [] %}
+    {% for msg in messages_all %}
+        {% if channel_type == 'global' and msg.channel_type == 'global' %}
+            {% set channel_messages = channel_messages|merge([msg]) %}
+        {% elseif channel_type == 'space' and msg.channel_type == 'space' and msg.channel_id == channel_id %}
+            {% set channel_messages = channel_messages|merge([msg]) %}
+        {% elseif channel_type == 'direct' and msg.channel_type == 'direct' %}
+            {% if (msg.sender == current_user and msg.channel_id == channel_id) or 
+                  (msg.sender == channel_id and msg.channel_id == current_user) %}
+                {% set channel_messages = channel_messages|merge([msg]) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    
+    {% if channel_messages|length > 0 %}
+        {% for msg in channel_messages %}
+            {% set is_own = msg.sender == current_user %}
+            {% set sender_user = accounts ? accounts.load(msg.sender) : null %}
+            {% set sender_name = sender_user and sender_user.exists ? sender_user.fullname|default(msg.sender) : msg.sender %}
+            
+            <div class="skn-message-group {{ is_own ? 'skn-message-own' : '' }}">
+                {% if not is_own %}
+                    <div class="skn-message-avatar">
+                        {{ sender_name|first|upper }}
+                    </div>
+                {% endif %}
+                <div class="skn-message-content">
+                    {% if not is_own and channel_type != 'direct' %}
+                        <div class="skn-message-sender">{{ sender_name }}</div>
+                    {% endif %}
+                    <div class="skn-message-bubble">
+                        <div class="skn-message-text">{{ msg.content|nl2br }}</div>
+                    </div>
+                    <div class="skn-message-time">{{ msg.timestamp|slice(-8, 5)|default('--') }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="skn-chat-empty">
+            <i class="la la-comments"></i>
+            <h3>Aucun message</h3>
+            <p>Soyez le premier à envoyer un message !</p>
+        </div>
+    {% endif %}
+</div>
+
+{# Zone de saisie #}
+<div class="skn-chat-input-area">
+    <form method="post" action="/send-message" class="skn-chat-input-form" id="chat-form">
+        <input type="hidden" name="channel_type" value="{{ channel_type }}" />
+        <input type="hidden" name="channel_id" value="{{ channel_id }}" />
+        {{ nonce_field('send-message', 'message-nonce')|raw }}
+        
+        <div class="skn-chat-input-wrapper">
+            <textarea name="content" 
+                      class="skn-chat-input" 
+                      placeholder="Écrire un message..." 
+                      rows="1"
+                      required
+                      id="message-input"></textarea>
+        </div>
+        <button type="submit" class="skn-chat-send-btn" title="Envoyer">
+            <i class="la la-paper-plane"></i>
+        </button>
+    </form>
+</div>

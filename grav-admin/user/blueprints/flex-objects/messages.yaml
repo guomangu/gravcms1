@@ -1,0 +1,58 @@
+title: Messages
+description: Système de messagerie et discussions.
+type: flex-objects
+
+config:
+  admin:
+    router:
+      path: '/flex-objects/messages'
+    list:
+      title: sender
+      fields:
+        timestamp:
+        sender:
+        channel_type:
+        channel_id:
+        content:
+    menu:
+      list:
+        route: '/flex-objects/messages'
+        title: Messages
+        icon: fa-comments
+
+  data:
+    storage:
+      class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\JsonFormatter'
+        folder: 'user://data/flex-objects'
+        filename: 'messages.json'
+
+form:
+  validation: loose
+  fields:
+    channel_type:
+      type: select
+      label: Type de canal
+      options:
+        space: Espace
+        direct: Message privé
+        global: Global
+    
+    channel_id:
+      type: text
+      label: ID du canal
+    
+    sender:
+      type: text
+      label: Expéditeur
+    
+    content:
+      type: textarea
+      label: Message
+      rows: 3
+    
+    timestamp:
+      type: text
+      label: Horodatage

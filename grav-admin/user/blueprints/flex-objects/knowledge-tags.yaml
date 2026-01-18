@@ -1,0 +1,47 @@
+title: Tags de Connaissance
+description: Taxonomie des connaissances.
+type: flex-objects
+
+config:
+  admin:
+    router:
+      path: '/flex-objects/knowledge-tags'
+    list:
+      title: name
+      fields:
+        name:
+          link: edit
+        slug:
+        description:
+    menu:
+      list:
+        route: '/flex-objects/knowledge-tags'
+        title: Tags
+        icon: fa-tags
+
+  data:
+    storage:
+      class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\JsonFormatter'
+        folder: 'user://data/flex-objects'
+        filename: 'tags.json'
+
+form:
+  validation: loose
+  fields:
+    name:
+      type: text
+      label: Nom du Tag
+      validate:
+        required: true
+    
+    slug:
+      type: text
+      label: Identifiant
+    
+    description:
+      type: textarea
+      label: Description
+      rows: 3

@@ -1,0 +1,26 @@
+{
+  "act_001": {
+    "timestamp": "2026-01-17 10:00:00",
+    "actor": "guillaume",
+    "verb": "create",
+    "object_type": "space",
+    "object_id": "demo-ia",
+    "context": null
+  },
+  "act_002": {
+    "timestamp": "2026-01-17 10:05:00",
+    "actor": "guillaume",
+    "verb": "create",
+    "object_type": "space",
+    "object_id": "dev-web",
+    "context": null
+  },
+  "act_003": {
+    "timestamp": "2026-01-17 10:10:00",
+    "actor": "guillaume",
+    "verb": "create",
+    "object_type": "space",
+    "object_id": "grav-cms",
+    "context": null
+  }
+}

@@ -1,0 +1,16 @@
+name: Maîtriser Grav CMS
+slug: grav-cms
+description: |
+  Groupe de travail pour approfondir les connaissances sur Grav CMS et son écosystème.
+  
+  **Contenu :**
+  - Flex Objects avancés
+  - Développement de plugins
+  - Création de thèmes
+  - Optimisation des performances
+access_level: public
+admins:
+  - guillaume
+members:
+  - guillaume
+published: true

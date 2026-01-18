@@ -1,0 +1,35 @@
+{# ============================================= #}
+{# PARTIAL: Liste des membres                   #}
+{# ============================================= #}
+{# Params: admins, members #}
+
+{# Compter les membres uniques #}
+{% set unique_count = admins|length %}
+{% for m in members if m not in admins %}
+    {% set unique_count = unique_count + 1 %}
+{% endfor %}
+
+<section class="skn-section">
+    <header class="skn-section__header">
+        <h2><i class="la la-users"></i> Membres</h2>
+        <span class="skn-badge">{{ unique_count }}</span>
+    </header>
+
+    <div class="skn-members-grid">
+        {# Admins en premier #}
+        {% for username in admins %}
+            <div class="skn-member-chip skn-member-chip--admin">
+                <span class="skn-avatar skn-avatar--xs">{{ username|first|upper }}</span>
+                <span>{{ username }}</span>
+                <span class="skn-badge skn-badge--admin skn-badge--xs">Admin</span>
+            </div>
+        {% endfor %}
+        {# Membres (non-admins) #}
+        {% for username in members if username not in admins %}
+            <div class="skn-member-chip">
+                <span class="skn-avatar skn-avatar--xs">{{ username|first|upper }}</span>
+                <span>{{ username }}</span>
+            </div>
+        {% endfor %}
+    </div>
+</section>

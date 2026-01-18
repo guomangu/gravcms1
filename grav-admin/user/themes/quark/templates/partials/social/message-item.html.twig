@@ -1,0 +1,60 @@
+{# ============================================= #}
+{# PARTIAL: Item de message réutilisable         #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - message: objet message Flex
+{#   - current_user: utilisateur courant (optionnel)
+{#   - variant: 'default' | 'compact' (optionnel)
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% set variant = variant|default('default') %}
+{% set sender = message.sender|default('Anonyme') %}
+{% set content = message.content|default('') %}
+{% set timestamp = message.timestamp|default('--') %}
+{% set channel = message.channel|default('global') %}
+{% set is_own = current_user and (current_user == sender) %}
+
+<div class="skn-message-item skn-message-item--{{ variant }}{% if is_own %} skn-message-item--own{% endif %}">
+    {# Avatar (sauf si propre message et variante compacte) #}
+    {% if not (is_own and variant == 'compact') %}
+        <div class="skn-message-item__avatar">
+            {{ macros.avatar(sender, 'sm', '/u/' ~ sender) }}
+        </div>
+    {% endif %}
+    
+    {# Contenu du message #}
+    <div class="skn-message-item__content">
+        {# Header avec nom et timestamp #}
+        <div class="skn-message-item__header">
+            {% if not is_own %}
+                {{ macros.user_link(sender, sender) }}
+            {% endif %}
+            {{ macros.time_ago(timestamp) }}
+        </div>
+        
+        {# Corps du message #}
+        <div class="skn-message-item__body">
+            {{ content|raw }}
+        </div>
+        
+        {# Badge de canal (si pas global) #}
+        {% if variant != 'compact' and channel != 'global' %}
+            <div class="skn-message-item__meta">
+                {% if channel starts with 'space:' %}
+                    {% set space_slug = channel|replace({'space:': ''}) %}
+                    <span class="skn-message-channel">
+                        <i class="la la-layer-group"></i> 
+                        <a href="/s/{{ space_slug }}">{{ space_slug }}</a>
+                    </span>
+                {% elseif channel starts with 'dm:' %}
+                    <span class="skn-message-channel skn-message-channel--dm">
+                        <i class="la la-envelope"></i> Message privé
+                    </span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>

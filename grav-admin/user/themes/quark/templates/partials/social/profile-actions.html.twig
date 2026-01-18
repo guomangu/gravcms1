@@ -1,0 +1,31 @@
+{# ============================================= #}
+{# PARTIAL: Actions de profil utilisateur        #}
+{# ============================================= #}
+{# 
+{# Variables attendues:
+{#   - target_user: utilisateur cible
+{#   - current_user: username de l'utilisateur connecté (ou null)
+{#   - is_own_profile: bool si c'est son propre profil
+{#   - followers: liste des followers du target
+{# --------------------------------------------- #}
+
+{% import 'macros/social-macros.html.twig' as macros %}
+
+{% if not is_own_profile and current_user %}
+    <div class="skn-profile-actions">
+        {% set is_following = current_user in (followers|default([])) %}
+        <form method="post" action="/social-action" class="skn-inline-form">
+            <input type="hidden" name="action" value="{{ is_following ? 'unfollow' : 'follow' }}">
+            <input type="hidden" name="target" value="{{ target_user.username }}">
+            <button type="submit" class="skn-btn {{ is_following ? 'skn-btn-outline' : 'skn-btn-primary' }}">
+                <i class="la la-{{ is_following ? 'user-minus' : 'user-plus' }}"></i>
+                {{ is_following ? 'Ne plus suivre' : 'Suivre' }}
+            </button>
+        </form>
+        {{ macros.btn('/messages?type=direct&channel=' ~ target_user.username, 'Message', 'comment', 'outline') }}
+    </div>
+{% elseif is_own_profile %}
+    <div class="skn-profile-actions">
+        {{ macros.btn('/admin', 'Modifier mon profil', 'edit', 'outline') }}
+    </div>
+{% endif %}

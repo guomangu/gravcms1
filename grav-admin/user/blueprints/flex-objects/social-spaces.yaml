@@ -1,0 +1,107 @@
+title: Rooms
+description: Espaces de discussion thématiques.
+type: flex-objects
+
+config:
+  admin:
+    router:
+      path: '/flex-objects/social-spaces'
+    list:
+      title: name
+      fields:
+        name:
+          link: edit
+        slug:
+        access_level:
+        members:
+          field:
+            type: array
+    menu:
+      list:
+        route: '/flex-objects/social-spaces'
+        title: Rooms
+        icon: fa-comments
+    edit:
+      title:
+        template: "{{ object.name ?? 'Nouvelle Room' }}"
+
+  data:
+    storage:
+      class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\JsonFormatter'
+        folder: 'user://data/flex-objects'
+        filename: 'rooms.json'
+
+form:
+  validation: loose
+  fields:
+    tabs:
+      type: tabs
+      active: 1
+      fields:
+        common:
+          type: tab
+          title: Configuration de la Room
+          fields:
+            name:
+              type: text
+              label: Nom de la Room
+              validate:
+                required: true
+            
+            slug:
+              type: text
+              label: Identifiant URL (Slug)
+              help: "Utilisé pour l'URL (ex: /room/ma-room)"
+              validate:
+                required: true
+                pattern: "[a-z0-9-]+"
+                message: "Seules les lettres minuscules, chiffres et tirets sont autorisés."
+            
+            description:
+              type: textarea
+              label: Description
+              rows: 5
+            
+            access_level:
+              type: select
+              label: Visibilité
+              default: 'public'
+              options:
+                'public': 'Public (Ouvert)'
+                'private': 'Privé (Sur invitation)'
+        
+        location_tab:
+          type: tab
+          title: Localisation
+          fields:
+            location:
+              type: text
+              label: Lieu / Adresse
+              help: "Ville, pays ou adresse"
+            
+            latitude:
+              type: text
+              label: Latitude
+              help: "Coordonnée GPS latitude"
+            
+            longitude:
+              type: text
+              label: Longitude
+              help: "Coordonnée GPS longitude"
+        
+        members_tab:
+          type: tab
+          title: Gestion des Membres
+          fields:
+            admins:
+              type: array
+              label: Administrateurs
+              value_only: true
+            
+            members:
+              type: array
+              label: Membres Actifs
+              value_only: true

@@ -1,0 +1,105 @@
+{# ============================================= #}
+{# PARTIAL: Card générique modulaire             #}
+{# ============================================= #}
+{# 
+{# Variables:
+{#   - title: titre de la card
+{#   - subtitle: sous-titre (optionnel)
+{#   - icon: icône LA (optionnel)
+{#   - avatar: lettre avatar (optionnel)
+{#   - avatar_color: couleur avatar (optionnel)
+{#   - badge: texte badge (optionnel)
+{#   - badge_type: type badge (optionnel)
+{#   - description: description (optionnel)
+{#   - link: URL de la card (optionnel)
+{#   - edit_link: URL édition (optionnel)
+{#   - stats: array [{icon, value, label}] (optionnel)
+{#   - actions: array [{url, label, icon, style}] (optionnel)
+{#   - variant: 'default' | 'compact' | 'horizontal' (optionnel)
+{#   - clickable: bool (optionnel)
+{# --------------------------------------------- #}
+
+{% set variant = variant|default('default') %}
+{% set clickable = clickable|default(link is defined) %}
+
+<article class="skn-card-item skn-card-item--{{ variant }}{% if clickable %} skn-card-item--clickable{% endif %}">
+    {# Lien wrapper si clickable #}
+    {% if link and clickable %}
+    <a href="{{ link }}" class="skn-card-item__link">
+    {% endif %}
+    
+    {# Header avec avatar/icon et badge #}
+    <div class="skn-card-item__header">
+        {% if avatar is defined %}
+            <div class="skn-card-item__avatar" {% if avatar_color %}style="background: {{ avatar_color }}"{% endif %}>
+                {{ avatar }}
+            </div>
+        {% elseif icon is defined %}
+            <div class="skn-card-item__icon">
+                <i class="la la-{{ icon }}"></i>
+            </div>
+        {% endif %}
+        
+        {% if badge is defined %}
+            <span class="skn-badge skn-badge--{{ badge_type|default('default') }}">
+                {{ badge }}
+            </span>
+        {% endif %}
+    </div>
+    
+    {# Corps de la card #}
+    <div class="skn-card-item__body">
+        <h3 class="skn-card-item__title">
+            {% if link and not clickable %}
+                <a href="{{ link }}">{{ title|default('Sans titre') }}</a>
+            {% else %}
+                {{ title|default('Sans titre') }}
+            {% endif %}
+        </h3>
+        
+        {% if subtitle is defined %}
+            <p class="skn-card-item__subtitle">{{ subtitle }}</p>
+        {% endif %}
+        
+        {% if description is defined and variant != 'compact' %}
+            <p class="skn-card-item__desc">
+                {{ description|striptags|truncate(120) }}
+            </p>
+        {% endif %}
+    </div>
+    
+    {% if link and clickable %}
+    </a>
+    {% endif %}
+    
+    {# Footer avec stats et actions #}
+    <div class="skn-card-item__footer">
+        {% if stats is defined and stats|length > 0 %}
+            <div class="skn-card-item__stats">
+                {% for stat in stats %}
+                    <span class="skn-card-item__stat" {% if stat.label is defined %}title="{{ stat.label }}"{% endif %}>
+                        {% if stat.icon is defined %}<i class="la la-{{ stat.icon }}"></i>{% endif %}
+                        {{ stat.value|default(0) }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if actions is defined and actions|length > 0 %}
+            <div class="skn-card-item__actions">
+                {% for action in actions %}
+                    <a href="{{ action.url }}" class="skn-btn skn-btn--{{ action.style|default('outline') }} skn-btn--sm">
+                        {% if action.icon is defined %}<i class="la la-{{ action.icon }}"></i>{% endif %}
+                        {{ action.label|default('Action') }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if edit_link is defined %}
+            <a href="{{ edit_link }}" class="skn-card-item__edit" title="Modifier">
+                <i class="la la-edit"></i>
+            </a>
+        {% endif %}
+    </div>
+</article>
