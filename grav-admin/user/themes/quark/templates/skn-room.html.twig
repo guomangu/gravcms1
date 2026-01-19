@@ -17,16 +17,37 @@
         {% set room_desc = room.description|default('') %}
         {% set room_admins = room.admins|default([]) %}
         {% set room_members = room.members|default([]) %}
-        {% set is_member = is_logged_in and (current_user.username in room_members or current_user.username in room_admins) %}
-        {% set is_admin = is_logged_in and (current_user.username in room_admins) %}
+
         {# Compter les membres uniques (éviter doublons admin/membre) #}
         {% set all_unique_members = [] %}
-        {% for u in room_admins %}{% set all_unique_members = all_unique_members|merge([u]) %}{% endfor %}
-        {% for u in room_members if u not in all_unique_members %}{% set all_unique_members = all_unique_members|merge([u]) %}{% endfor %}
+        
+        {# Normalisation en minuscules pour comparaison #}
+        {% set current_user = grav.user %}
+        {% set current_username_lower = current_user.username|lower %}
+        {% set room_admins_lower = [] %}
+        {% set room_members_lower = [] %}
+        
+        {% for u in room_admins %}
+            {% set u_lower = u|lower %}
+            {% set room_admins_lower = room_admins_lower|merge([u_lower]) %}
+            {% set all_unique_members = all_unique_members|merge([u]) %}
+        {% endfor %}
+        
+        {% for u in room_members %}
+            {% set u_lower = u|lower %}
+            {% set room_members_lower = room_members_lower|merge([u_lower]) %}
+            {% if u not in all_unique_members %}
+                {% set all_unique_members = all_unique_members|merge([u]) %}
+            {% endif %}
+        {% endfor %}
+        
+        {% set is_member = is_logged_in and (current_username_lower in room_members_lower or current_username_lower in room_admins_lower) %}
+        {% set is_admin = is_logged_in and (current_username_lower in room_admins_lower) %}
+        
         {% set total_members = all_unique_members|length %}
         
         {# Demandes d'adhésion #}
-        {% set my_request_key = room_slug ~ '_' ~ current_user %}
+        {% set my_request_key = room_slug ~ '_' ~ current_user.username %}
         {% set my_request = membership_requests[my_request_key]|default(null) %}
         {% set has_pending_request = my_request and my_request.status == 'pending' %}
         
