@@ -163,5 +163,16 @@
         "read_by": [
             "testuser3375"
         ]
+    },
+    "msg_696d827a97b32": {
+        "id": "msg_696d827a97b32",
+        "channel_type": "space_external",
+        "channel_id": "azerty",
+        "sender": "guang",
+        "content": "yo",
+        "timestamp": "2026-01-19 01:01:46",
+        "read_by": [
+            "guang"
+        ]
     }
 }

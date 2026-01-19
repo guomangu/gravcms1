@@ -58,88 +58,17 @@
         {% endfor %}
 
         {# ========== HEADER ========== #}
-        <header class="skn-room-header">
-            <a href="/mesrooms" class="skn-back-link">
-                <i class="la la-arrow-left"></i> Retour
-            </a>
-            
-            <div class="skn-room-header__main">
-                <div class="skn-room-header__avatar">{{ room_name|first|upper }}</div>
-                <div class="skn-room-header__info">
-                    <h1>{{ room_name }}</h1>
-                    <span class="skn-room-header__meta">
-                        <i class="la la-users"></i> {{ total_members }} membre(s)
-                    </span>
-                    
-                    {# Display Address Hierarchy #}
-                    {% if room.address_tag %}
-                        {% set address_chain = get_address_hierarchy(room.address_tag) %}
-                        {% if address_chain %}
-                            <div class="skn-room-address">
-                                <i class="la la-map-marker"></i>
-                                <div class="skn-address-breadcrumbs">
-                                    {% for tag in address_chain %}
-                                        <a href="/tags/{{ tag.slug }}" class="skn-address-tag skn-address-tag--{{ tag.tag_type }}" title="{{ tag.tag_type|capitalize }}">
-                                            {{ tag.name }}
-                                        </a>
-                                        {% if not loop.last %}
-                                            <span class="skn-address-separator">/</span>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% elseif room.location %}
-                        <div class="skn-room-address">
-                            <i class="la la-map-marker"></i>
-                            <span class="skn-address-text">{{ room.location }}</span>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            {# Actions #}
-            <div class="skn-room-header__actions">
-                {% if not is_logged_in %}
-                    <a href="/login?redirect={{ uri.path|url_encode }}" class="skn-btn skn-btn--primary">
-                        <i class="la la-sign-in-alt"></i> Se connecter
-                    </a>
-                {% elseif is_admin %}
-                    <span class="skn-badge skn-badge--admin">Admin</span>
-                {% elseif is_member %}
-                    <span class="skn-badge skn-badge--success">Membre</span>
-                    <form method="post" action="/social-action" class="skn-inline-form">
-                        <input type="hidden" name="action" value="leave-space">
-                        <input type="hidden" name="target" value="{{ room_slug }}">
-                        {{ nonce_field('social-action', 'social-nonce')|raw }}
-                        <button type="submit" class="skn-btn skn-btn--sm skn-btn--ghost">
-                            <i class="la la-sign-out-alt"></i> Quitter
-                        </button>
-                    </form>
-                {% elseif has_pending_request %}
-                    <span class="skn-badge skn-badge--warning">
-                        <i class="la la-hourglass-half"></i> Demande en cours
-                    </span>
-                    <form method="post" action="/social-action" class="skn-inline-form">
-                        <input type="hidden" name="action" value="cancel-request">
-                        <input type="hidden" name="target" value="{{ room_slug }}">
-                        {{ nonce_field('social-action', 'social-nonce')|raw }}
-                        <button type="submit" class="skn-btn skn-btn--sm skn-btn--ghost" title="Annuler">
-                            <i class="la la-times"></i>
-                        </button>
-                    </form>
-                {% else %}
-                    <form method="post" action="/social-action" class="skn-inline-form">
-                        <input type="hidden" name="action" value="request-join">
-                        <input type="hidden" name="target" value="{{ room_slug }}">
-                        {{ nonce_field('social-action', 'social-nonce')|raw }}
-                        <button type="submit" class="skn-btn skn-btn--primary">
-                            <i class="la la-user-plus"></i> Devenir membre
-                        </button>
-                    </form>
-                {% endif %}
-            </div>
-        </header>
+        {% include 'partials/skn/room-header.html.twig' with {
+            room: room,
+            room_name: room_name,
+            room_slug: room_slug,
+            total_members: total_members,
+            is_logged_in: is_logged_in,
+            is_admin: is_admin,
+            is_member: is_member,
+            has_pending_request: has_pending_request,
+            uri: uri
+        } %}
 
         {# ========== DESCRIPTION ========== #}
         {% if room_desc %}
