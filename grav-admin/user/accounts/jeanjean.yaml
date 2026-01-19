@@ -1,0 +1,7 @@
+state: enabled
+email: jeanjean@gmail.com
+fullname: jeanjean
+access:
+  site:
+    login: true
+hashed_password: $2y$12$tN9Ffp.c2vIJ2rKlaC4Qb.b92ikq7BtUvu0c64vZ6t0oUTeCQRLCW

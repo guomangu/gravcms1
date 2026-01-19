@@ -1,0 +1,60 @@
+Arbre de Présentation du Code Fonctionnel - Grav Social Network
+Ce document présente l'architecture fonctionnelle active du projet, en filtrant le code inutilisé ou chaotique. L'architecture repose sur un modèle hybride Grav Pages + Flex Objects.
+
+1. Cœur du Système (Backend Logic)
+Le plugin social-core est le chef d'orchestre. Il gère les événements (Hooks), la logique métier et les extensions Twig.
+
+Plugin: user/plugins/social-core/
+social-core.php
+: [CRITIQUE] Contient toute la logique PHP (Hooks onUserSave, onFormProcessed, onFlexAfterSave). Gère la synchronisation des relations (User <-> Space).
+blueprints.yaml
+: Configuration du plugin.
+2. Modèle de Données (Flex Objects)
+Les entités dynamiques (qui ne sont pas des pages web classiques) sont définies ici.
+
+Blueprints: user/blueprints/flex-objects/
+
+user-accounts.yaml: Extension du profil utilisateur (Champs: profile, relations). Stockage: user/data/flex-objects/accounts.
+social-spaces.yaml
+: Définition des Espaces/Groupes. Stockage: user/data/flex-objects/spaces.
+activity-stream.yaml
+: Journal d'activités (Logs). Stockage: user/data/flex-objects/activity.
+knowledge-tags.yaml
+: Système de tags/compétences.
+messages.yaml
+: Système de messagerie interne.
+Configuration: 
+user/config/plugins/flex-objects.yaml
+ (Définit quels répertoires sont actifs).
+
+3. Routage & Contrôleurs (Dispatchers)
+Grav utilise des pages "virtuelles" (Dispatchers) pour gérer les URLs dynamiques comme /u/pseudo ou /s/groupe.
+
+Configuration des Routes: 
+user/config/site.yaml
+
+/room/(.*) -> /sys/room
+/profile/(.*) -> /sys/profiles/dispatcher
+/tags/(.*) -> /sys/tags/dispatcher
+Pages Système: user/pages/sys/ (Dossier caché, non visible dans le menu)
+
+profiles/dispatcher/: Gère l'affichage des profils utilisateurs.
+spaces/dispatcher/: Gère l'affichage des espaces.
+room/: Gère l'affichage des "Rooms" (probablement lié à custom_user ou social-spaces).
+tags/: Gère l'affichage des tags.
+4. Frontend & Thème
+Le rendu visuel repose sur le thème quark (à vérifier si étendu) et les templates Twig.
+
+Thème: user/themes/quark/ (Standard)
+Templates Critiques (Accessibles via user/themes/quark/templates/ ou user/plugins/social-core/templates/):
+flex-objects/user-accounts/item.html.twig: Vue d'un profil.
+flex-objects/social-spaces/item.html.twig: Vue d'un espace.
+5. Zones "Chaotiques" / À Ignorer (Potentiellement)
+Ces dossiers semblent être des vestiges de développement ou des duplicatas à nettoyer.
+
+user/pages/02.account vs user/pages/02.login: Possible redondance.
+user/pages/03.mesrooms vs user/pages/05.mesrooms vs user/pages/mesrooms: Conflit évident. Seule la route définie dans 
+site.yaml
+ (si présente) ou l'ordre numérique fait foi.
+user/pages/05.explore vs user/pages/06.explore: Duplication probable.
+Note: Pour travailler efficacement, concentrez-vous sur les modifications dans user/plugins/social-core pour la logique et user/blueprints/flex-objects pour la structure de données.

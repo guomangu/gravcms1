@@ -7,5 +7,14 @@
         "status": "pending",
         "votes_accept": [],
         "votes_reject": []
+    },
+    "demo-ia_testuser3375": {
+        "id": "demo-ia_testuser3375",
+        "space_slug": "demo-ia",
+        "username": "testuser3375",
+        "timestamp": "2026-01-19 00:03:25",
+        "status": "pending",
+        "votes_accept": [],
+        "votes_reject": []
     }
 }

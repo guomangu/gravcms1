@@ -3,7 +3,7 @@
 {# ============================================= #}
 {# Params: type (external/internal), title, icon, badge, room_slug, messages, can_write, can_view, placeholder, locked_message #}
 
-{% set can_view = can_view|default(true) %}
+{% set can_view = can_view is defined ? can_view : true %}
 {% set channel_type = type == 'internal' ? 'space_internal' : 'space_external' %}
 
 <section class="skn-section skn-chat-section skn-chat-section--{{ type }}">
@@ -57,6 +57,11 @@
             <div class="skn-chat-locked__content">
                 <i class="la la-lock"></i>
                 <p>{{ locked_message|default('Réservé aux membres') }}</p>
+                {% if not is_logged_in %}
+                     <p class="skn-muted">
+                        <a href="/login?redirect={{ uri.path|url_encode }}">Connectez-vous</a> pour accéder
+                     </p>
+                {% endif %}
             </div>
         </div>
     {% endif %}

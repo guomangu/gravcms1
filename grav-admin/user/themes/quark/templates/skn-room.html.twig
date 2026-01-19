@@ -17,8 +17,8 @@
         {% set room_desc = room.description|default('') %}
         {% set room_admins = room.admins|default([]) %}
         {% set room_members = room.members|default([]) %}
-        {% set is_member = current_user in room_members or current_user in room_admins %}
-        {% set is_admin = current_user in room_admins %}
+        {% set is_member = is_logged_in and (current_user.username in room_members or current_user.username in room_admins) %}
+        {% set is_admin = is_logged_in and (current_user.username in room_admins) %}
         {# Compter les membres uniques (éviter doublons admin/membre) #}
         {% set all_unique_members = [] %}
         {% for u in room_admins %}{% set all_unique_members = all_unique_members|merge([u]) %}{% endfor %}

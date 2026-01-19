@@ -144,40 +144,52 @@
                         <div class="skn-card__header">
                             <h3>
                                 <i class="la la-comments"></i> 
-                                {% if is_member %}Discussion interne{% else %}Discussion publique{% endif %}
+                                Discussion interne
                             </h3>
                         </div>
 
                         {# Zone des messages #}
                         <div class="skn-chat__messages" id="chat-messages">
-                            {% if room_messages|length > 0 %}
-                                {% for msg in room_messages %}
-                                    {% set sender = accounts ? accounts.load(msg.sender) : null %}
-                                    {% set is_own = current_user == msg.sender %}
-                                    <div class="skn-message{% if is_own %} skn-message--own{% endif %}">
-                                        {% if not is_own %}
-                                            <a href="/u/{{ msg.sender }}" class="skn-message__avatar">
-                                                {{ (sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender)|first|upper }}
-                                            </a>
-                                        {% endif %}
-                                        <div class="skn-message__content">
+                            {% if is_member %}
+                                {% if room_messages|length > 0 %}
+                                    {% for msg in room_messages %}
+                                        {% set sender = accounts ? accounts.load(msg.sender) : null %}
+                                        {% set is_own = current_user == msg.sender %}
+                                        <div class="skn-message{% if is_own %} skn-message--own{% endif %}">
                                             {% if not is_own %}
-                                                <span class="skn-message__sender">
-                                                    {{ sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender }}
-                                                </span>
+                                                <a href="/u/{{ msg.sender }}" class="skn-message__avatar">
+                                                    {{ (sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender)|first|upper }}
+                                                </a>
                                             {% endif %}
-                                            <div class="skn-message__bubble">
-                                                {{ msg.content|nl2br }}
+                                            <div class="skn-message__content">
+                                                {% if not is_own %}
+                                                    <span class="skn-message__sender">
+                                                        {{ sender and sender.exists ? sender.fullname|default(msg.sender) : msg.sender }}
+                                                    </span>
+                                                {% endif %}
+                                                <div class="skn-message__bubble">
+                                                    {{ msg.content|nl2br }}
+                                                </div>
+                                                <span class="skn-message__time">{{ msg.timestamp|default('--')|slice(-8, 5) }}</span>
                                             </div>
-                                            <span class="skn-message__time">{{ msg.timestamp|default('--')|slice(-8, 5) }}</span>
                                         </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="skn-chat__empty">
+                                        <i class="la la-comments"></i>
+                                        <p>Aucun message</p>
+                                        <p class="skn-muted">Soyez le premier à écrire !</p>
                                     </div>
-                                {% endfor %}
+                                {% endif %}
                             {% else %}
-                                <div class="skn-chat__empty">
-                                    <i class="la la-comments"></i>
-                                    <p>Aucun message</p>
-                                    <p class="skn-muted">Soyez le premier à écrire !</p>
+                                <div class="skn-chat__locked">
+                                    <i class="la la-lock"></i>
+                                    <p>Discussion réservée aux membres</p>
+                                    {% if not is_logged_in %}
+                                        <p class="skn-muted"><a href="/login?redirect=/room/{{ room_slug }}">Connectez-vous</a> pour accéder à la discussion</p>
+                                    {% else %}
+                                        <p class="skn-muted">Rejoignez la room pour voir les messages</p>
+                                    {% endif %}
                                 </div>
                             {% endif %}
                         </div>

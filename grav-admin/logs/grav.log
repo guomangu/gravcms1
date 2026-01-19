@@ -100,3 +100,5 @@
 [2026-01-18 22:47:16] grav.INFO: Room added to JSON: treza [] []
 [2026-01-18 22:58:39] grav.INFO: Room added to JSON: azerty [] []
 [2026-01-18 23:03:27] grav.INFO: Room added to JSON: eciec [] []
+[2026-01-19 00:03:20] grav.INFO: Message sent by testuser3375 to space_external/demo-ia [] []
+[2026-01-19 00:03:25] grav.INFO: Social action: request-join on demo-ia by testuser3375 [] []

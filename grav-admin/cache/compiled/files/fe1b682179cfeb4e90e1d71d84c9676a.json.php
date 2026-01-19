@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledJsonFile',
     'filename' => '/home/gu/g2/grav-admin/user/data/flex-objects.json',
-    'modified' => 1768777407,
-    'size' => 5926,
+    'modified' => 1768781005,
+    'size' => 6086,
     'data' => [
         '72b605af2aefde5b913e3c43442834da' => [
             'id' => 'msg_696c241176bf7',
@@ -265,6 +265,13 @@ return [
             'latitude' => 6960103.36,
             'longitude' => 373768.52,
             'description' => '6 La Rue 50110 Bretteville'
+        ],
+        'c5357259330a3ce7d9a1f52783da2ae4' => [
+            'timestamp' => '2026-01-19 00:03:25',
+            'actor' => 'testuser3375',
+            'verb' => 'request_join',
+            'object_type' => 'space',
+            'object_id' => 'demo-ia'
         ]
     ]
 ];

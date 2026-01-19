@@ -152,5 +152,16 @@
         "read_by": [
             "testuser3375"
         ]
+    },
+    "msg_696d74c804f27": {
+        "id": "msg_696d74c804f27",
+        "channel_type": "space_external",
+        "channel_id": "demo-ia",
+        "sender": "testuser3375",
+        "content": "yo",
+        "timestamp": "2026-01-19 00:03:20",
+        "read_by": [
+            "testuser3375"
+        ]
     }
 }
