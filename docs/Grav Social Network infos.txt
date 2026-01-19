@@ -1,60 +1,67 @@
 Arbre de Présentation du Code Fonctionnel - Grav Social Network
-Ce document présente l'architecture fonctionnelle active du projet, en filtrant le code inutilisé ou chaotique. L'architecture repose sur un modèle hybride Grav Pages + Flex Objects.
+[MISE A JOUR: 2026-01-19 - Refactoring Modulaire]
+
+Ce document présente l'architecture fonctionnelle active du projet.
+L'architecture repose sur un modèle hybride Grav Pages + Flex Objects, avec un code backend (PHP) et frontend (Twig) modularisé pour une maintenance simplifiée.
 
 1. Cœur du Système (Backend Logic)
-Le plugin social-core est le chef d'orchestre. Il gère les événements (Hooks), la logique métier et les extensions Twig.
+Le plugin `social-core` est le chef d'orchestre. Il a été refactorisé pour utiliser des Traits PHP (fichiers < 200 lignes).
 
-Plugin: user/plugins/social-core/
-social-core.php
-: [CRITIQUE] Contient toute la logique PHP (Hooks onUserSave, onFormProcessed, onFlexAfterSave). Gère la synchronisation des relations (User <-> Space).
-blueprints.yaml
-: Configuration du plugin.
-2. Modèle de Données (Flex Objects)
-Les entités dynamiques (qui ne sont pas des pages web classiques) sont définies ici.
+Plugin: `user/plugins/social-core/`
+  - `social-core.php`: [COORDINATEUR] Initie le plugin, charge les traits et abonne les événements (Hooks). Ne contient plus de logique métier lourde.
+  
+  Traits (`user/plugins/social-core/traits/`):
+  - `SocialUserTrait.php`: Gestion des utilisateurs (Follow/Unfollow).
+  - `SocialSpaceTrait.php`: Gestion des Rooms/Espaces (Création, Join, Leave, Synchro Membres).
+  - `SocialMessageTrait.php`: Gestion de l'envoi de messages (Chat interne/externe).
+  - `SocialVoteTrait.php`: Système de vote pour rejoindre les rooms privées (Request, Vote, Accept, Reject).
+  - `SocialTagTrait.php`: Geocoding (API Adresse Gouv) et Hiérarchie d'adresses (Tag de ville, rue, etc.).
+  - `SocialUtilsTrait.php`: Utilitaires transverses (Logs, Slugify, Flexloader).
 
-Blueprints: user/blueprints/flex-objects/
+2. Modèle de Données (Flex Objects & JSON)
+Les données dynamiques sont stockées dans des fichiers JSON (SimpleStorage) ou via Flex Objects.
 
-user-accounts.yaml: Extension du profil utilisateur (Champs: profile, relations). Stockage: user/data/flex-objects/accounts.
-social-spaces.yaml
-: Définition des Espaces/Groupes. Stockage: user/data/flex-objects/spaces.
-activity-stream.yaml
-: Journal d'activités (Logs). Stockage: user/data/flex-objects/activity.
-knowledge-tags.yaml
-: Système de tags/compétences.
-messages.yaml
-: Système de messagerie interne.
-Configuration: 
-user/config/plugins/flex-objects.yaml
- (Définit quels répertoires sont actifs).
+Stockage (`user/data/flex-objects/`):
+  - `rooms.json`: Liste des Rooms (Nom, Slug, Membres, Admins, Adresse).
+  - `messages.json`: Historique des messages de chat.
+  - `membership-requests.json`: En attente de vote pour rejoindre les rooms.
+  - `activity.json`: Journal d'activité (Logs sociaux).
+  - `accounts/`: Profils utilisateurs étendus.
 
-3. Routage & Contrôleurs (Dispatchers)
-Grav utilise des pages "virtuelles" (Dispatchers) pour gérer les URLs dynamiques comme /u/pseudo ou /s/groupe.
+Blueprints (`user/blueprints/flex-objects/`):
+  - `social-spaces.yaml`: Définition structurelle des Rooms.
+  - `knowledge-tags.yaml`: Définition des Tags/Lieux.
+  - `activity-stream.yaml`: Structure des logs.
 
-Configuration des Routes: 
-user/config/site.yaml
+3. Frontend & Thème (Twig)
+Le rendu visuel utilise le thème `quark` avec une structure modulaire (Partials).
 
-/room/(.*) -> /sys/room
-/profile/(.*) -> /sys/profiles/dispatcher
-/tags/(.*) -> /sys/tags/dispatcher
-Pages Système: user/pages/sys/ (Dossier caché, non visible dans le menu)
+Thème: `user/themes/quark/`
 
-profiles/dispatcher/: Gère l'affichage des profils utilisateurs.
-spaces/dispatcher/: Gère l'affichage des espaces.
-room/: Gère l'affichage des "Rooms" (probablement lié à custom_user ou social-spaces).
-tags/: Gère l'affichage des tags.
-4. Frontend & Thème
-Le rendu visuel repose sur le thème quark (à vérifier si étendu) et les templates Twig.
+Templates Principaux (`templates/`):
+  - `skn-room.html.twig`: Page principale d'une Room. [REFACTORISÉ] Utilise des partials pour rester lisible (< 200 lignes).
 
-Thème: user/themes/quark/ (Standard)
-Templates Critiques (Accessibles via user/themes/quark/templates/ ou user/plugins/social-core/templates/):
-flex-objects/user-accounts/item.html.twig: Vue d'un profil.
-flex-objects/social-spaces/item.html.twig: Vue d'un espace.
-5. Zones "Chaotiques" / À Ignorer (Potentiellement)
-Ces dossiers semblent être des vestiges de développement ou des duplicatas à nettoyer.
+Partials Modulaires (`templates/partials/skn/`):
+  - `room-header.html.twig`: En-tête de la room (Titre, Actions rejoindre/quitter, Adresse).
+  - `chat-box.html.twig`: Module de chat (réutilisable pour interne/externe).
+  - `vote-panel.html.twig`: Interface de vote pour les membres.
+  - `request-status.html.twig`: État de la demande pour les non-membres.
+  - `members-list.html.twig`: Liste des membres et admins.
 
-user/pages/02.account vs user/pages/02.login: Possible redondance.
-user/pages/03.mesrooms vs user/pages/05.mesrooms vs user/pages/mesrooms: Conflit évident. Seule la route définie dans 
-site.yaml
- (si présente) ou l'ordre numérique fait foi.
-user/pages/05.explore vs user/pages/06.explore: Duplication probable.
-Note: Pour travailler efficacement, concentrez-vous sur les modifications dans user/plugins/social-core pour la logique et user/blueprints/flex-objects pour la structure de données.
+4. Routage (Dispatchers)
+Les URLs dynamiques sont gérées via `user/config/site.yaml`.
+
+Routes:
+  - `/room/(.*)` -> Charge la page `user/pages/sys/room` (template `skn-room`).
+  - `/u/(.*)` -> Profil utilisateur.
+  - `/tags/(.*)` -> Page de tag (ville, rue).
+
+5. Bonnes Pratiques pour l'Agent Autonome
+- **Atomicité**: Les fichiers doivent rester courts (< 200 lignes).
+- **PHP**: Ajouter la logique dans le Trait correspondant (ex: une nouvelle action de room va dans `SocialSpaceTrait`).
+- **Twig**: Créer un partial dans `templates/partials/skn/` pour tout nouveau bloc d'interface complexe.
+- **Débogage**: Utiliser `grav.user` pour l'utilisateur courant (évite les bugs de conversion string).
+
+6. Zones à Ignorer (Legacy/Conflits)
+- `user/pages/03.mesrooms` vs `user/pages/05.mesrooms`: Se fier uniquement au menu généré ou aux routes explicites.
+- Code mort dans `social-core.php`: Vérifier qu'une fonction n'existe pas déjà dans un Trait avant d'ajouter.

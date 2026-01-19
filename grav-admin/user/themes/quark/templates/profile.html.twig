@@ -109,9 +109,9 @@
                 {% else %}
                     {% include 'partials/social/empty-state.html.twig' with {
                         message: 'Aucun espace rejoint.',
-                        cta_url: is_own_profile ? '/explore' : null,
-                        cta_label: 'Explorer les espaces',
-                        cta_icon: 'compass',
+                        cta_url: is_own_profile ? '/' : null,
+                        cta_label: 'Retour à l\'accueil',
+                        cta_icon: 'home',
                         cta_style: 'outline',
                         current_user: is_own_profile ? current_user : null,
                         variant: 'inline'
@@ -148,9 +148,9 @@
         icon: 'user-slash',
         title: 'Utilisateur introuvable',
         message: "L'utilisateur <strong>" ~ request_slug ~ "</strong> n'existe pas.",
-        cta_url: '/explore',
-        cta_label: 'Explorer la communauté',
-        cta_icon: 'compass'
+        cta_url: '/',
+        cta_label: 'Retour à l\'accueil',
+        cta_icon: 'home'
     } only %}
 {% endif %}
 {% endblock %}

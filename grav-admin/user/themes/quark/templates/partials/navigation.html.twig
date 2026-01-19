@@ -8,9 +8,7 @@
     <li class="{% if current_path == '/' %}active{% endif %}">
         <a href="/"><i class="la la-home"></i> Accueil</a>
     </li>
-    <li class="{% if '/explore' in current_path %}active{% endif %}">
-        <a href="/explore"><i class="la la-compass"></i> Explorer</a>
-    </li>
+
     {% if is_logged_in %}
         <li class="{% if '/mesrooms' in current_path %}active{% endif %}">
             <a href="/mesrooms"><i class="la la-layer-group"></i> Mes Rooms</a>

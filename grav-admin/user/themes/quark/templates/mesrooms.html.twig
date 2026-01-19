@@ -59,8 +59,8 @@
                         </div>
                         <h3>Aucune room abonnée</h3>
                         <p>Rejoignez des rooms pour les voir apparaître ici.</p>
-                        <a href="/explore" class="skn-btn skn-btn--primary">
-                            <i class="la la-compass"></i> Explorer les rooms
+                        <a href="/" class="skn-btn skn-btn--primary">
+                            <i class="la la-home"></i> Retour à l'accueil
                         </a>
                     </div>
                 {% endif %}
@@ -83,12 +83,6 @@
                     {% endfor %}
                 </div>
 
-                {% if recommended_rooms|length > 6 %}
-                    <div class="skn-section__footer">
-                        <a href="/explore" class="skn-btn skn-btn--outline">
-                            Voir plus <i class="la la-arrow-right"></i>
-                        </a>
-                    </div>
                 {% endif %}
             </section>
             {% endif %}
