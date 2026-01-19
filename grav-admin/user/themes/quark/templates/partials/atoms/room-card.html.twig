@@ -13,7 +13,9 @@
 {% set room_location = room.location|default(null) %}
 {% set user_is_member = current_user in room_members_list or current_user in room_admins %}
 
-<a href="/room/{{ room_slug }}" class="skn-room-card{% if user_is_member %} skn-room-card--member{% endif %}">
+<a href="/room/{{ room_slug }}" class="skn-room-card{% if user_is_member %} skn-room-card--member{% endif %}"
+   {% if latitude %}data-lat="{{ latitude }}"{% endif %}
+   {% if longitude %}data-lon="{{ longitude }}"{% endif %}>
     <div class="skn-room-card__avatar">
         {{ room_name|first|upper }}
     </div>

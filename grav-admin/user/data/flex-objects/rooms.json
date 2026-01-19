@@ -249,5 +249,20 @@
         "location": "6 La Rue 50110 Bretteville",
         "address_tag": "2465bebddf22e33e1734e8848295ad47",
         "created": "2026-01-18 23:03:27"
+    },
+    "oooo-lol": {
+        "name": "oooo lol",
+        "description": "bonjour messaiuers",
+        "slug": "oooo-lol",
+        "admins": [
+            "testuser3375"
+        ],
+        "members": [
+            "testuser3375"
+        ],
+        "access_level": "public",
+        "location": "Rue de Sigolsheim 68000 Colmar",
+        "address_tag": "4a81c4922f2787d91e53bf324a6d3b8f",
+        "created": "2026-01-19 00:41:06"
     }
 }

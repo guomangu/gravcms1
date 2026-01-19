@@ -2,8 +2,8 @@
 return [
     '@class' => 'Grav\\Common\\File\\CompiledJsonFile',
     'filename' => '/home/gu/g2/grav-admin/user/data/flex-objects.json',
-    'modified' => 1768781005,
-    'size' => 6086,
+    'modified' => 1768783266,
+    'size' => 7447,
     'data' => [
         '72b605af2aefde5b913e3c43442834da' => [
             'id' => 'msg_696c241176bf7',
@@ -272,6 +272,60 @@ return [
             'verb' => 'request_join',
             'object_type' => 'space',
             'object_id' => 'demo-ia'
+        ],
+        'd36b46bd1f10357b73ee71d1c4d5a0b8' => [
+            'name' => 'France',
+            'slug' => 'pays-france',
+            'tag_type' => 'pays',
+            'published' => true,
+            'description' => 'Pays'
+        ],
+        '322079a678dbc59d4ba90d421f807790' => [
+            'name' => '68, Haut-Rhin, Grand Est',
+            'slug' => 'region-68-haut-rhin-grand-est-abf86',
+            'tag_type' => 'region',
+            'parent' => 'd36b46bd1f10357b73ee71d1c4d5a0b8',
+            'published' => true,
+            'description' => 'Région / Département auto-généré'
+        ],
+        'cbc70b319db9f99ea7dd5fcd6d4c66fc' => [
+            'name' => 'France',
+            'slug' => 'pays-france',
+            'tag_type' => 'pays',
+            'published' => true,
+            'description' => 'Pays'
+        ],
+        '48d72e40a7bc9f03a206f3f8ed9f11f6' => [
+            'name' => '68, Haut-Rhin, Grand Est',
+            'slug' => 'region-68-haut-rhin-grand-est-73ece',
+            'tag_type' => 'region',
+            'parent' => 'cbc70b319db9f99ea7dd5fcd6d4c66fc',
+            'published' => true,
+            'description' => 'Région / Département auto-généré'
+        ],
+        '303e01902cdd457b37a962c5a2a0d18e' => [
+            'name' => 'Colmar',
+            'slug' => 'ville-colmar-1fcde',
+            'tag_type' => 'ville',
+            'parent' => '48d72e40a7bc9f03a206f3f8ed9f11f6',
+            'published' => true,
+            'citycode' => '68066',
+            'postcode' => '68000',
+            'description' => 'Colmar',
+            'longitude' => 7.358669,
+            'latitude' => 48.075901
+        ],
+        '4a81c4922f2787d91e53bf324a6d3b8f' => [
+            'name' => 'Rue de Sigolsheim',
+            'slug' => 'rue-rue-de-sigolsheim-9bf58',
+            'tag_type' => 'rue',
+            'parent' => '303e01902cdd457b37a962c5a2a0d18e',
+            'published' => true,
+            'description' => 'Rue de Sigolsheim',
+            'longitude' => 7.328844,
+            'latitude' => 48.088585,
+            'postcode' => '68000',
+            'citycode' => '68066'
         ]
     ]
 ];

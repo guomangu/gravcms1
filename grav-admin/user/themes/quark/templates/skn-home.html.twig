@@ -3,6 +3,7 @@
 {% block content %}
 {# Chargement des données #}
 {% include 'partials/skn/flex-loader.html.twig' %}
+{% set knowledge_tags = grav.get('flex_objects').directory('knowledge-tags').getIndex() %}
 
 <div class="skn-home">
     {# Hero - Action principale #}
@@ -43,8 +44,18 @@
 
         {% if rooms_count > 0 %}
             <div class="skn-card-grid">
-                {% for room in rooms|slice(0, 6) %}
-                    {% include 'partials/atoms/room-card.html.twig' with {room: room} %}
+                {% for room in rooms|slice(0, 30) %}
+                    {# Resolve coordinates #}
+                    {% set lat = null %}
+                    {% set lon = null %}
+                    {% if room.address_tag %}
+                        {% set tag = knowledge_tags[room.address_tag] %}
+                        {% if tag %}
+                            {% set lat = tag.latitude %}
+                            {% set lon = tag.longitude %}
+                        {% endif %}
+                    {% endif %}
+                    {% include 'partials/atoms/room-card.html.twig' with {room: room, latitude: lat, longitude: lon} %}
                 {% endfor %}
             </div>
         {% else %}
@@ -74,4 +85,100 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block bottom %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!navigator.geolocation) return;
+
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            
+            // Reverse Geocoding
+            fetch(`https://api-adresse.data.gouv.fr/reverse/?lon=${userLon}&lat=${userLat}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        const address = data.features[0].properties.label;
+                        const header = document.querySelector('.skn-section__header');
+                        if (header) {
+                            const locationInfo = document.createElement('div');
+                            locationInfo.innerHTML = `<i class="la la-map-marker"></i> Votre position : <strong>${address}</strong>`;
+                            locationInfo.style.cssText = 'color: #7f8c8d; font-size: 0.9em; margin-top: 5px;';
+                            header.appendChild(locationInfo);
+                        }
+                    }
+                })
+                .catch(err => console.log('Geocoding error:', err));
+
+            const container = document.querySelector('.skn-card-grid');
+            if (!container) return;
+
+            const cards = Array.from(container.children);
+            
+            // Calculate distances and sort
+            const cardsWithDist = cards.map(card => {
+                const link = card.tagName === 'A' ? card : card.querySelector('a');
+                if (!link || !link.dataset.lat || !link.dataset.lon) return { card, dist: Infinity };
+                
+                const lat = parseFloat(link.dataset.lat);
+                const lon = parseFloat(link.dataset.lon);
+                const dist = getDistanceFromLatLonInKm(userLat, userLon, lat, lon);
+                
+                // Optional: Display distance
+                const meta = card.querySelector('.skn-room-card__meta');
+                if (meta) {
+                    let distBadges = meta.querySelectorAll('.skn-dist-badge');
+                    distBadges.forEach(b => b.remove());
+                    
+                    const span = document.createElement('span');
+                    span.className = 'skn-dist-badge';
+                    span.innerHTML = `<i class="la la-location-arrow"></i> ${dist.toFixed(1)} km`;
+                    span.style.marginLeft = '10px';
+                    span.style.fontSize = '0.85em';
+                    span.style.color = '#27ae60';
+                    meta.appendChild(span);
+                }
+                
+                return { card, dist };
+            });
+
+            cardsWithDist.sort((a, b) => a.dist - b.dist);
+
+            // Reorder DOM and show only top 6
+            cardsWithDist.forEach((item, index) => {
+                item.card.style.display = index < 6 ? '' : 'none';
+                container.appendChild(item.card);
+            });
+            
+            // Update header
+            const header = document.querySelector('.skn-section__header h2');
+            if (header) header.innerHTML += ' <small style="font-size: 0.6em; font-weight: normal;">(à proximité)</small>';
+
+        }, function(error) {
+            console.log("Geolocation error:", error);
+        });
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = deg2rad(lat2-lat1);  // deg2rad below
+            var dLon = deg2rad(lon2-lon1); 
+            var a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+                ; 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            var d = R * c; // Distance in km
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+    });
+    </script>
 {% endblock %}

@@ -749,26 +749,88 @@ class SocialCorePlugin extends Plugin
     public function onFlexObjectBeforeSave(Event $event)
     {
         $object = $event['object'];
-        if ($object->getFlexType() !== 'social-spaces') {
+        $type = $object->getFlexType();
+        
+        // 1. Social Spaces (Room Creation)
+        if ($type === 'social-spaces') {
+             // Check if address data was submitted
+            $form = $this->grav['request']->getParsedBody();
+            $addressDataJson = $form['data']['address_data'] ?? null;
+            
+            if ($addressDataJson) {
+                $addressData = json_decode($addressDataJson, true);
+                if ($addressData && isset($addressData['properties'])) {
+                    // Extract coordinates
+                    $coordinates = $addressData['geometry']['coordinates'] ?? null;
+                    
+                    // Process hierarchy with coordinates
+                    $tagId = $this->processAddressHierarchy($addressData['properties'], $coordinates);
+                    if ($tagId) {
+                        $object->setProperty('address_tag', $tagId);
+                        $object->setProperty('location', $addressData['properties']['label'] ?? '');
+                        if ($coordinates) {
+                            $object->setProperty('longitude', $coordinates[0]);
+                            $object->setProperty('latitude', $coordinates[1]);
+                        }
+                    }
+                }
+            }
             return;
         }
 
-        // Check if address data was submitted
-        $form = $this->grav['request']->getParsedBody();
-        $addressDataJson = $form['data']['address_data'] ?? null;
-        
-        if ($addressDataJson) {
-            $addressData = json_decode($addressDataJson, true);
-            if ($addressData && isset($addressData['properties'])) {
-                $tagId = $this->processAddressHierarchy($addressData['properties']);
-                if ($tagId) {
-                    $object->set('address_tag', $tagId);
-                    // Also save raw location data for easier component access if needed
-                    $object->set('location', $addressData['properties']['label'] ?? '');
-                    $coordinates = $addressData['geometry']['coordinates'] ?? null;
-                    if ($coordinates) {
-                        $object->set('longitude', $coordinates[0]);
-                        $object->set('latitude', $coordinates[1]);
+        // 2. Knowledge Tags (Manual Creation)
+        // Auto-Geocoding if no coordinates provided
+        if ($type === 'knowledge-tags') {
+            $isNew = !$object->exists();
+            $lat = $object->getProperty('latitude');
+            $lon = $object->getProperty('longitude');
+            
+            // Only if new or forcing update, and has no coords
+            if ((empty($lat) || empty($lon))) {
+                $name = $object->getProperty('name');
+                $tagType = $object->getProperty('tag_type');
+                
+                // Don't geocode everything, only location-relevant tags if they have a name
+                if ($name && in_array($tagType, ['ville', 'rue', 'numero'])) {
+                    // Build query
+                    $query = $name;
+                    $parent = $object->getProperty('parent');
+                    if ($parent) {
+                        $directory = $this->getFlexDirectory('knowledge-tags');
+                        $parentObj = $directory ? $directory->getObject($parent) : null;
+                        if ($parentObj) {
+                            $query .= ' ' . $parentObj->getProperty('name');
+                        }
+                    }
+                    
+                    // Call API
+                    $url = "https://api-adresse.data.gouv.fr/search/?q=" . urlencode($query) . "&limit=1";
+                    try {
+                        $response = file_get_contents($url, false, stream_context_create(['http' => ['timeout' => 2]]));
+                        if ($response) {
+                            $json = json_decode($response, true);
+                            if (!empty($json['features'])) {
+                                $feat = $json['features'][0];
+                                $coords = $feat['geometry']['coordinates'] ?? null;
+                                if ($coords) {
+                                    $object->setProperty('longitude', $coords[0]);
+                                    $object->setProperty('latitude', $coords[1]);
+                                    
+                                    // Also set postcode/citycode if available and empty
+                                    if (!$object->getProperty('postcode')) {
+                                        $object->setProperty('postcode', $feat['properties']['postcode'] ?? '');
+                                    }
+                                    if (!$object->getProperty('citycode')) {
+                                        $object->setProperty('citycode', $feat['properties']['citycode'] ?? '');
+                                    }
+                                    
+                                    $this->grav['log']->info("Auto-geocoded tag: {$name} -> {$coords[1]}, {$coords[0]}");
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore geocoding errors to not block save
+                        $this->grav['log']->warning("Geocoding failed for {$name}: " . $e->getMessage());
                     }
                 }
             }
@@ -782,7 +844,7 @@ class SocialCorePlugin extends Plugin
      * Process address hierarchy and return the leaf node ID (Number or Street)
      * Strictly enforces: Region -> City -> Street -> Number
      */
-    public function processAddressHierarchy($props)
+    public function processAddressHierarchy($props, $coordinates = null)
     {
         $directory = $this->getFlexDirectory('knowledge-tags');
         if (!$directory) return null;
@@ -818,8 +880,8 @@ class SocialCorePlugin extends Plugin
         // 4. Number (Enfant de Street, facultatif)
         if (!empty($props['housenumber'])) {
             $numberTag = $this->findOrCreateTag($directory, $props['housenumber'], 'numero', $streetTag->getKey(), [
-                 'latitude' => $props['y'] ?? $props['latitude'] ?? null,
-                 'longitude' => $props['x'] ?? $props['longitude'] ?? null,
+                 'latitude' => $coordinates ? $coordinates[1] : ($props['y'] ?? $props['latitude'] ?? null),
+                 'longitude' => $coordinates ? $coordinates[0] : ($props['x'] ?? $props['longitude'] ?? null),
                  'description' => $props['label'] ?? ''
             ]);
             return $numberTag->getKey();
